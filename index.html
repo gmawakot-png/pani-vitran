@@ -46,20 +46,22 @@
         .summary-table td { padding: 5px 6px; font-size: 13px; border-bottom: 1px dashed #cbd5e1; }
         .summary-table td.val { text-align: right; font-weight: bold; color: #c0392b; }
         .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 15px; border: 1px solid #a6acaf; border-radius: 4px; }
-        table.main-table { width: 100%; min-width: 900px; border-collapse: collapse; font-size: 12px; }
+        table.main-table { width: 100%; min-width: 950px; border-collapse: collapse; font-size: 12px; }
         table.main-table th, table.main-table td { border: 1px solid #cbd5e1; padding: 6px 5px; text-align: center; white-space: nowrap; }
         table.main-table th { background-color: #ebedef; font-weight: bold; color: #2c3e50; }
         table.main-table th.red-txt, table.main-table td.red-txt { color: #c0392b; }
         tr.highlight-row { background-color: #d4efdf !important; font-weight: bold; }
         
         .admin-only { display: none; }
-        .toggle-admin-btn { background: #34495e; color: #fff; border: none; font-size: 12px; padding: 4px 10px; border-radius: 4px; cursor: pointer; }
+        .toggle-admin-btn { background: #34495e; color: #fff; border: none; font-size: 12px; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .btn-action { background: #27ae60; color: #fff; width: 100%; padding: 6px; margin-top: 5px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .btn-view-chart { background: #16a085; color: #fff; border: none; padding: 8px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; margin-top: 8px; width: 100%; }
         .full-chart-box { display: none; margin-top: 10px; padding: 10px; background: #fcf3cf; border: 1px solid #f1c40f; border-radius: 5px; font-size: 12px; max-height: 250px; overflow-y: auto; }
         
-        .btn-move { background: #3498db; color: white; border: none; padding: 2px 6px; font-size: 11px; border-radius: 3px; cursor: pointer; margin: 0 1px; }
+        .btn-move { background: #3498db; color: white; border: none; padding: 4px 8px; font-size: 12px; border-radius: 3px; cursor: pointer; margin: 0 1px; font-weight: bold; }
         .btn-move:disabled { background: #bdc3c7; cursor: not-allowed; }
+        .btn-insert { background: #27ae60; color: white; border: none; padding: 4px 8px; font-size: 11px; border-radius: 3px; cursor: pointer; margin: 0 1px; font-weight: bold; }
+        .btn-delete { background: #e74c3c; color: white; border: none; padding: 4px 8px; font-size: 11px; border-radius: 3px; cursor: pointer; margin: 0 1px; font-weight: bold; }
 
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
@@ -81,6 +83,17 @@
             position: fixed; bottom: 20px; right: 20px; background: #2980b9; color: #fff; padding: 12px 20px;
             border-radius: 30px; border: none; font-size: 14px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
             cursor: pointer; z-index: 1000; display: none;
+        }
+
+        .clean-input {
+            border: 1px solid #bdc3c7;
+            padding: 4px 6px;
+            border-radius: 4px;
+            font-size: 12px;
+            outline: none;
+        }
+        .clean-input:focus {
+            border-color: #2980b9;
         }
     </style>
 </head>
@@ -108,7 +121,7 @@
                 </select>
             </div>
 
-            <div class="admin-date-controls admin-only" id="directAdminDateBox">
+            <div class="admin-date-controls admin-only-block" id="directAdminDateBox" style="display:none;">
                 <b style="color:#1e8449; font-size:12px;">⚙️ वर्तमान तारीख व दिन का अंतर (गैप) बदलें:</b>
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px; gap:8px;">
                     <div>
@@ -140,11 +153,11 @@
                 <tr><td>कुल बीघा:</td><td class="val" id="sumBigha">45</td></tr>
                 <tr><td>बांटा गया कुल समय (घंटे/मिनट):</td><td class="val" id="displayDistributedHM">11 घंटे 00 मिनट</td></tr>
                 <tr><td>कुल पानी वितरण समय (घंटे/मिनट):</td><td class="val" id="displayTotalDistributionHM">11 घंटे 40 मिनट</td></tr>
-                <tr><td>आखरी बचा समय (घंटे/मिनट):</td><td class="val" id="displayRemainingHours">गणना हो रही है...</td></tr>
+                <tr><td>आखरी बचा समय (घंटे/मिनट):</td><td class="val" id="displayRemainingHours">0 मिनट</td></tr>
             </table>
         </div>
 
-        <div class="controls-card admin-only" id="adminControls">
+        <div class="controls-card admin-only-block" id="adminControls" style="display:none;">
             <h3>एडमिन सेटिंग्स (Admin Only)</h3>
             <div class="input-group">
                 <label for="totalPoolHours">कुल उपलब्ध पानी का समय (घंटे/मिनट):</label>
@@ -158,8 +171,7 @@
                 <label for="startTime">शुरुआती समय (Start):</label>
                 <input type="text" id="startTime" value="07:00:00 AM" onchange="calculateAll()">
             </div>
-            <button class="btn-action" onclick="addRow()">+ नया नाम जोड़ें</button>
-            <button class="btn-action" style="background:#8e44ad;" onclick="reverseTableOrder()">🔄 पूरी सारणी का क्रम उल्टा करें</button>
+            
             <button class="btn-action" style="background:#27ae60;" onclick="saveDataToCloud()">☁️ ऑनलाइन क्लाउड पर सेव करें</button>
             <button class="btn-action" style="background:#8e44ad;" onclick="openChangePassModal()">🔑 पासवर्ड बदलें</button>
         </div>
@@ -169,7 +181,7 @@
         <table class="main-table" id="scheduleTable">
             <thead>
                 <tr>
-                    <th style="width: 40px;">S.No</th>
+                    <th style="width: 45px;">S.No</th>
                     <th>नाम</th>
                     <th>बीघा</th>
                     <th class="red-txt">मिनट</th>
@@ -179,7 +191,7 @@
                     <th class="red-txt">तक (समाप्ति)</th>
                     <th>धनराशी</th>
                     <th>रू० प्राप्त तारीख</th>
-                    <th class="admin-only">कार्रवाई</th>
+                    <th id="actionHeader" style="display:none; min-width: 220px;">कार्रवाई</th>
                 </tr>
             </thead>
             <tbody id="tableBody"></tbody>
@@ -189,8 +201,7 @@
                     <td id="totalBighaFoot">45</td>
                     <td id="totalMinFoot">657</td>
                     <td id="totalHMFoot">10 घंटे 57 मिनट</td>
-                    <td id="totalExtraFoot">0 घंटे 00 मिनट</td>
-                    <td colspan="5"></td>
+                    <td colspan="6"></td>
                 </tr>
             </tfoot>
         </table>
@@ -263,23 +274,12 @@
     setInterval(updateLiveClock, 1000);
     updateLiveClock();
 
-    // एडमिन मोड में व्यक्ति की पूरी पंक्ति (नाम, बीघा, अतिरिक्त समय,
-    // धनराशी और तारीख सहित) ऊपर/नीचे करने का फीचर
     function moveRow(index, direction) {
         const newIndex = index + direction;
-
         if (newIndex < 0 || newIndex >= initialData.length) return;
 
-        // पूरा object swap होगा, इसलिए नाम के साथ उसका बीघा और बाकी डेटा भी साथ जाएगा
-        [initialData[index], initialData[newIndex]] =
-            [initialData[newIndex], initialData[index]];
-
+        [initialData[index], initialData[newIndex]] = [initialData[newIndex], initialData[index]];
         renderTable();
-
-        // जिस व्यक्ति को move किया गया है, उसे dropdown में selected रखें
-        const userSelect = document.getElementById('userSelect');
-        userSelect.value = newIndex;
-        findMyTurn();
     }
 
     function togglePassVisibility(inputId) {
@@ -290,7 +290,7 @@
     function openAdminModal() {
         if(isAdmin) {
             isAdmin = false;
-            alert("व्यू मोड चालू।");
+            alert("व्यू मोड चालू। (एडमिन बटन बंद)");
             renderTable();
         } else {
             document.getElementById('adminPassInput').value = '';
@@ -307,7 +307,7 @@
         if(pass === adminPassword) {
             isAdmin = true;
             closeAdminModal();
-            alert("एडमिन मोड चालू!");
+            alert("एडमिन मोड चालू हो गया है! अब आप सभी बटन और नाम देख सकते हैं।");
             renderTable();
         } else {
             alert("गलत पासवर्ड!");
@@ -436,16 +436,13 @@
         const tbody = document.getElementById('tableBody');
         tbody.innerHTML = '';
 
-        document.querySelectorAll('.admin-only').forEach(el => {
-            if(el.tagName === 'TH' || el.tagName === 'TD') {
-                el.style.display = isAdmin ? 'table-cell' : 'none';
-            } else {
-                el.style.display = isAdmin ? 'block' : 'none';
-            }
-        });
-
+        document.getElementById('actionHeader').style.display = isAdmin ? 'table-cell' : 'none';
         document.getElementById('floatingSaveBtn').style.display = isAdmin ? 'block' : 'none';
         document.getElementById('editToggleBtn').innerText = isAdmin ? "🔓 Admin Active" : "🔐 Admin Edit";
+
+        document.querySelectorAll('.admin-only-block').forEach(el => {
+            el.style.display = isAdmin ? 'block' : 'none';
+        });
 
         initialData.forEach((row, index) => {
             const tr = document.createElement('tr');
@@ -454,19 +451,30 @@
             if(isAdmin) {
                 tr.innerHTML = `
                     <td>${index + 1}</td>
-                    <td style="text-align: left;"><input type="text" value="${row.name}" oninput="updateData(${index}, 'name', this.value)" style="width:100%;"></td>
-                    <td><input type="number" value="${row.bigha}" step="0.1" style="width:50px; text-align:center;" oninput="updateData(${index}, 'bigha', parseFloat(this.value)||0)"></td>
+                    <td style="text-align: left;">
+                        <input type="text" class="clean-input" value="${row.name}" oninput="updateData(${index}, 'name', this.value)" style="width:100%;">
+                    </td>
+                    <td>
+                        <input type="number" class="clean-input" value="${row.bigha}" step="0.1" style="width:55px; text-align:center;" oninput="updateData(${index}, 'bigha', parseFloat(this.value)||0)">
+                    </td>
                     <td class="col-min">0</td>
                     <td class="col-hm">0</td>
-                    <td><input type="number" value="${row.extra}" style="width:50px; text-align:center;" placeholder="-" oninput="updateData(${index}, 'extra', parseFloat(this.value)||0)"></td>
+                    <td>
+                        <input type="number" class="clean-input" value="${row.extra}" style="width:50px; text-align:center;" placeholder="-" oninput="updateData(${index}, 'extra', parseFloat(this.value)||0)">
+                    </td>
                     <td class="col-from">-</td>
                     <td class="col-to">-</td>
-                    <td><input type="text" value="${row.amount}" style="width:60px; text-align:center;" oninput="updateData(${index}, 'amount', this.value)"></td>
-                    <td><input type="text" value="${row.date}" style="width:80px; text-align:center;" oninput="updateData(${index}, 'date', this.value)"></td>
-                    <td class="admin-only">
+                    <td>
+                        <input type="text" class="clean-input" value="${row.amount}" style="width:65px; text-align:center;" oninput="updateData(${index}, 'amount', this.value)">
+                    </td>
+                    <td>
+                        <input type="text" class="clean-input" value="${row.date}" style="width:85px; text-align:center;" oninput="updateData(${index}, 'date', this.value)">
+                    </td>
+                    <td>
                         <button class="btn-move" onclick="moveRow(${index}, -1)" ${index === 0 ? 'disabled' : ''}>⬆️</button>
                         <button class="btn-move" onclick="moveRow(${index}, 1)" ${index === initialData.length - 1 ? 'disabled' : ''}>⬇️</button>
-                        <button style="background:#e74c3c; color:white; border:none; border-radius:3px; cursor:pointer;" onclick="deleteRow(${index})">X</button>
+                        <button class="btn-insert" onclick="insertRowAfter(${index})">➕ नीचे नाम जोड़ें</button>
+                        <button class="btn-delete" onclick="deleteRow(${index})">❌ हटाएँ</button>
                     </td>
                 `;
             } else {
@@ -481,7 +489,6 @@
                     <td class="col-to" style="font-weight:bold; color:#c0392b;">-</td>
                     <td>${row.amount || '-'}</td>
                     <td>${row.date || '-'}</td>
-                    <td class="admin-only"></td>
                 `;
             }
             tbody.appendChild(tr);
@@ -496,32 +503,41 @@
         calculateAll();
     }
 
-    // पूरी सारणी को एक क्लिक में उल्टा करें।
-    // हर व्यक्ति का पूरा डेटा (नाम, बीघा, अतिरिक्त समय, धनराशी, प्राप्त तारीख आदि)
-    // उसी व्यक्ति के साथ रहेगा। S.No अपने-आप 1,2,3... रहेगा।
-    function reverseTableOrder() {
-        initialData.reverse();
-        renderTable();
-
-        // अगर कोई नाम पहले से चुना था तो नए स्थान के अनुसार उसे फिर से चुनें
-        const userSelect = document.getElementById('userSelect');
-        if (userSelect.options.length > 1) {
-            userSelect.selectedIndex = 0;
-        }
-        findMyTurn();
-
-        alert("✅ पूरी सारणी का क्रम उल्टा कर दिया गया है। सभी नाम और उनका पूरा डेटा साथ में बदला है।");
-    }
-
-    function addRow() {
-        initialData.push({ name: "नया व्यक्ति", bigha: 1, extra: "", amount: "", date: "" });
-        renderTable();
-    }
-
     function deleteRow(index) {
-        if(initialData.length <= 1) return;
+        if(initialData.length <= 1) {
+            alert("कम से कम एक नाम रखना जरूरी है।");
+            return;
+        }
+
+        if (!confirm("क्या आप इस पंक्ति को हटाना चाहते हैं?")) return;
+
         initialData.splice(index, 1);
         renderTable();
+    }
+
+    function insertRowAfter(index) {
+        initialData.splice(index + 1, 0, {
+            name: "नया व्यक्ति",
+            bigha: 1,
+            extra: "",
+            amount: "",
+            date: ""
+        });
+
+        renderTable();
+
+        setTimeout(() => {
+            const rows = document.querySelectorAll('#tableBody tr');
+            const newRow = rows[index + 1];
+            if (newRow) {
+                newRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                const nameInput = newRow.querySelector('input[type="text"]');
+                if (nameInput) {
+                    nameInput.focus();
+                    nameInput.select();
+                }
+            }
+        }, 50);
     }
 
     function parseTimeStr(timeStr) {
@@ -575,20 +591,15 @@
         let firstStartTime = new Date(currentStartTime.getTime());
 
         let rows = document.querySelectorAll('#tableBody tr');
-        let grandTotalMinutes = 0;
-        let totalExtraMinutes = 0;
         let roundedTableMinutesSum = 0;
 
         initialData.forEach((row, i) => {
             let bigha = parseFloat(row.bigha) || 0;
             let extra = parseFloat(row.extra) || 0;
-
+            
             let min = totalBigha > 0 ? (bigha / totalBigha) * totalDistMinutes : 0;
             let roundedMin = Math.round(min);
-
             roundedTableMinutesSum += roundedMin;
-            grandTotalMinutes += min;
-            totalExtraMinutes += extra;
 
             let totalRowMinutes = min + extra;
 
@@ -596,7 +607,6 @@
             if(rowTR) {
                 rowTR.querySelector('.col-min').innerText = roundedMin;
                 rowTR.querySelector('.col-hm').innerText = formatHM(totalRowMinutes);
-
                 let startFormatted = formatTimeStr(currentStartTime);
                 rowTR.querySelector('.col-from').innerText = startFormatted;
 
@@ -616,55 +626,36 @@
         document.getElementById('totalMinFoot').innerText = roundedTableMinutesSum;
         document.getElementById('totalHMFoot').innerText = formatHM(roundedTableMinutesSum);
 
-        // अतिरिक्त समय का कुल योग नीचे दिखाएँ
-        document.getElementById('totalExtraFoot').innerText =
-            formatHM(totalExtraMinutes);
+        // कुल पानी वितरण समय (शुरुआत से लेकर आखिरी समाप्ति तक का अंतर)
+        let totalUsedMs = currentStartTime.getTime() - firstStartTime.getTime();
+        let totalDistributionMinutes = Math.round(totalUsedMs / (1000 * 60));
+        let distHrs = Math.floor(totalDistributionMinutes / 60);
+        let distMins = totalDistributionMinutes % 60;
+        document.getElementById('displayTotalDistributionHM').innerText = `${distHrs} घंटे ${distMins < 10 ? '0' + distMins : distMins} मिनट`;
 
-        // वास्तविक अंतिम समाप्ति समय
-        let finalEndTime = new Date(currentStartTime.getTime());
+        // =========================================================
+        // 🔥 आखरी बचा समय का सटीक समय अंतर फ़ॉर्मूला (Time Diff Formula)
+        // =========================================================
+        // कुल उपलब्ध समय (मिलीसेकंड में) = कुल उपलब्ध घंटे * 60 मिनट * 60 सेकंड * 1000
+        let totalPoolMs = totalPool * 60 * 60 * 1000;
 
-        // कुल उपलब्ध समय का अंतिम समय
-        // उदाहरण: 07:00:00 AM + 12 घंटे = 07:00:00 PM
-        let poolEndTime = new Date(
-            firstStartTime.getTime() + (totalPool * 60 * 60 * 1000)
-        );
+        // बचा हुआ समय (मिलीसेकंड में) = कुल उपलब्ध समय - टेबल द्वारा इस्तेमाल किया गया कुल समय
+        let remainingMs = totalPoolMs - totalUsedMs;
 
-        // EXACT बचा समय: मिलीसेकंड तक अंतर निकालकर घंटे/मिनट/सेकंड दिखाएँ।
-        let remainingMs = poolEndTime.getTime() - finalEndTime.getTime();
-        if(remainingMs < 0) remainingMs = 0;
+        if (remainingMs <= 0) {
+            document.getElementById('displayRemainingHours').innerText = "0 मिनट";
+        } else {
+            let totalRemSec = Math.round(remainingMs / 1000);
+            let remMin = Math.floor(totalRemSec / 60);
+            let remSec = totalRemSec % 60;
 
-        document.getElementById('displayRemainingHours').innerText =
-            formatExactDuration(remainingMs);
+            let remStr = "";
+            if (remMin > 0) remStr += `${remMin} मिनट `;
+            if (remSec > 0) remStr += `${remSec} सेकंड`;
+            if (remMin === 0 && remSec === 0) remStr = "0 मिनट";
 
-        // कुल वास्तविक वितरण समय
-        let totalDistributionMs = finalEndTime.getTime() - firstStartTime.getTime();
-        if(totalDistributionMs < 0) totalDistributionMs = 0;
-
-        document.getElementById('displayTotalDistributionHM').innerText =
-            formatExactDurationHM(totalDistributionMs);
-    }
-
-    // Exact समय: घंटे, मिनट और सेकंड
-    function formatExactDuration(ms) {
-        let totalSeconds = Math.floor(ms / 1000);
-        let hrs = Math.floor(totalSeconds / 3600);
-        let mins = Math.floor((totalSeconds % 3600) / 60);
-        let secs = totalSeconds % 60;
-
-        if(hrs > 0) {
-            return `${hrs} घंटे ${mins} मिनट ${secs} सेकंड`;
+            document.getElementById('displayRemainingHours').innerText = remStr.trim();
         }
-        return `${mins} मिनट ${secs} सेकंड`;
-    }
-
-    // कुल वितरण समय के लिए घंटे/मिनट/सेकंड भी exact दिखाएँ
-    function formatExactDurationHM(ms) {
-        let totalSeconds = Math.floor(ms / 1000);
-        let hrs = Math.floor(totalSeconds / 3600);
-        let mins = Math.floor((totalSeconds % 3600) / 60);
-        let secs = totalSeconds % 60;
-
-        return `${hrs} घंटे ${mins < 10 ? '0' + mins : mins} मिनट ${secs < 10 ? '0' + secs : secs} सेकंड`;
     }
 
     function findMyTurn() {
