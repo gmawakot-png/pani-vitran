@@ -29,7 +29,6 @@
         tr.highlight-row { background-color: #d4efdf !important; font-weight: bold; }
         
         .admin-only { display: none; }
-        
         .toggle-admin-btn { background: transparent; border: none; color: #888; font-size: 11px; float: right; cursor: pointer; }
         .btn-action { background: #27ae60; color: #fff; width: 100%; padding: 6px; margin-top: 5px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .btn-view-chart { background: #16a085; color: #fff; border: none; padding: 8px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; margin-top: 8px; width: 100%; }
@@ -44,7 +43,6 @@
             border: 2px solid #27ae60;
         }
 
-        /* FLOATING SAVE BUTTON FOR ADMIN */
         .floating-save-btn {
             position: fixed;
             bottom: 20px;
@@ -61,7 +59,6 @@
             z-index: 1000;
             display: none;
         }
-        .floating-save-btn:hover { background: #1f618d; }
     </style>
 </head>
 <body>
@@ -73,7 +70,6 @@
     </h2>
 
     <div class="top-section">
-        <!-- USER TURN CARD WITH DIRECT ADMIN INPUTS -->
         <div class="search-card">
             <h3>💧 पानी की अगली बारी की जानकारी</h3>
             
@@ -84,17 +80,16 @@
                 </select>
             </div>
 
-            <!-- एडमिन तारीख एवं दिन का गैप इनपुट -->
             <div class="admin-date-controls admin-only" id="directAdminDateBox">
                 <b style="color:#1e8449; font-size:12px;">⚙️ वर्तमान तारीख व दिन का अंतर (गैप) बदलें:</b>
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px; gap:8px;">
                     <div>
                         <span style="font-size:11px; font-weight:bold; display:block;">वर्तमान तारीख चुनें:</span>
-                        <input type="date" id="startDateInput" style="width:130px; padding:4px; font-size:12px; border:1px solid #27ae60; border-radius:4px; font-weight:bold;" onchange="autoSaveDateSettings()">
+                        <input type="date" id="startDateInput" style="width:130px; padding:4px; font-size:12px; border:1px solid #27ae60; border-radius:4px; font-weight:bold;" onchange="generate30DaysCalendar()">
                     </div>
                     <div>
                         <span style="font-size:11px; font-weight:bold; display:block;">दिन का गैप:</span>
-                        <input type="number" id="intervalInput" value="1" min="1" max="30" style="width:75px; padding:4px; text-align:center; font-size:13px; font-weight:bold; color:#c0392b; border:1px solid #27ae60; border-radius:4px;" oninput="autoSaveDateSettings()">
+                        <input type="number" id="intervalInput" value="1" min="1" max="30" style="width:75px; padding:4px; text-align:center; font-size:13px; font-weight:bold; color:#c0392b; border:1px solid #27ae60; border-radius:4px;" oninput="generate30DaysCalendar()">
                     </div>
                 </div>
             </div>
@@ -107,13 +102,10 @@
 
             <div id="fullChartBox" class="full-chart-box">
                 <b>🗓️ पूरे महीने का ऑटो-जनरेट शेड्यूल:</b>
-                <ol id="datesList" style="margin: 5px 0; padding-left: 20px;">
-                    <!-- Dynamic Dates List -->
-                </ol>
+                <ol id="datesList" style="margin: 5px 0; padding-left: 20px;"></ol>
             </div>
         </div>
 
-        <!-- SUMMARY CARD -->
         <div class="summary-card">
             <h3>सारांश (Summary)</h3>
             <table class="summary-table">
@@ -124,10 +116,8 @@
             </table>
         </div>
 
-        <!-- ADMIN CONTROLS -->
         <div class="controls-card admin-only" id="adminControls">
             <h3>एडमिन सेटिंग्स (Admin Only)</h3>
-            
             <div class="input-group">
                 <label for="totalPoolHours">कुल उपलब्ध पानी घंटे:</label>
                 <input type="number" id="totalPoolHours" value="12" step="0.1" oninput="calculateAll()">
@@ -141,13 +131,11 @@
                 <input type="text" id="startTime" value="07:00:00 AM" onchange="calculateAll()">
             </div>
             <button class="btn-action" onclick="addRow()">+ नया नाम जोड़ें</button>
-            <button class="btn-action" style="background:#27ae60;" onclick="saveAllData()">💾 संपूर्ण डेटा सेव करें</button>
+            <button class="btn-action" style="background:#27ae60;" onclick="saveDataToCloud()">☁️ ऑनलाइन क्लाउड पर सेव करें</button>
             <button class="btn-action" style="background:#8e44ad;" onclick="changeAdminPassword()">🔑 पासवर्ड बदलें</button>
-            <button class="btn-action" style="background:#e74c3c; margin-top:10px;" onclick="resetToDefault()">🔄 डेटा रिसेट करें</button>
         </div>
     </div>
 
-    <!-- MAIN DATA TABLE -->
     <div class="table-responsive">
         <table class="main-table" id="scheduleTable">
             <thead>
@@ -179,16 +167,18 @@
     </div>
 </div>
 
-<!-- FLOATING SAVE BUTTON -->
-<button class="floating-save-btn" id="floatingSaveBtn" onclick="saveAllData()">💾 सभी बदलाव सेव करें</button>
+<button class="floating-save-btn" id="floatingSaveBtn" onclick="saveDataToCloud()">💾 सभी बदलाव क्लाउड पर सेव करें</button>
 
 <script>
-    let isAdmin = false;
-    let adminPassword = localStorage.getItem('irrigation_admin_pass') || "1234";
+    // ⬇️ आपकी Bin ID और Master Key यहाँ सेट कर दी गई हैं!
+    const BIN_ID = "6a65ab61da38895dfe90bed8"; 
+    const MASTER_KEY = "$2a$10$JcvEWN7NJzepZ2xuDKG9g.Gjn/jzPPDh0sUxMcf2OyILulzPFrWoi"; 
 
+    let isAdmin = false;
+    let adminPassword = "2050"; 
     let waterDates = [];
 
-    const defaultData = [
+    let initialData = [
         { name: "श्री जितेन्द्र सिंह नेगी", bigha: 7, extra: 40, amount: "", date: "" },
         { name: "श्री उत्तम सिंह बिष्ट", bigha: 5, extra: "", amount: "", date: "" },
         { name: "श्री कोमल सिंह नेगी", bigha: 0.5, extra: "", amount: "", date: "" },
@@ -209,14 +199,59 @@
         { name: "श्रीमती जस्सी देवी", bigha: 3, extra: "", amount: 100, date: "25-07-2026" }
     ];
 
-    let initialData = JSON.parse(localStorage.getItem('irrigation_user_data')) || defaultData;
+    // ONLINE FETCH & SYNC
+    async function loadDataFromCloud() {
+        try {
+            let res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+                headers: { "X-Master-Key": MASTER_KEY }
+            });
+            let data = await res.json();
+            if(data.record) {
+                if(data.record.users) initialData = data.record.users;
+                if(data.record.password) adminPassword = data.record.password;
+                if(data.record.startDate) document.getElementById('startDateInput').value = data.record.startDate;
+                if(data.record.gapDays) document.getElementById('intervalInput').value = data.record.gapDays;
+                generate30DaysCalendar();
+                renderTable();
+            }
+        } catch(e) {
+            console.log("Error loading cloud data", e);
+        }
+    }
+
+    async function saveDataToCloud() {
+        let payload = {
+            users: initialData,
+            password: adminPassword,
+            startDate: document.getElementById('startDateInput').value,
+            gapDays: document.getElementById('intervalInput').value
+        };
+
+        try {
+            let res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Master-Key': MASTER_KEY
+                },
+                body: JSON.stringify(payload)
+            });
+            if(res.ok) {
+                alert("✅ डेटा ऑनलाइन क्लाउड पर सेव हो गया! अब हर मोबाइल में नई तारीख और पासवर्ड दिखेगा।");
+            } else {
+                alert("❌ डेटा सेव करने में समस्या आई! कृपया Master Key जांचें।");
+            }
+        } catch(e) {
+            alert("❌ नेटवर्क की समस्या है!");
+        }
+    }
 
     function toggleEditMode() {
         if(!isAdmin) {
             let pass = prompt("एडमिन पासवर्ड दर्ज करें:");
             if(pass === adminPassword) {
                 isAdmin = true;
-                alert("एडमिन मोड चालू! अब आप बदलाव करके सेव कर सकती हैं।");
+                alert("एडमिन मोड चालू!");
                 renderTable();
             } else if(pass !== null) {
                 alert("गलत पासवर्ड!");
@@ -234,59 +269,27 @@
             let newPass = prompt("नया पासवर्ड दर्ज करें:");
             if(newPass && newPass.trim() !== "") {
                 adminPassword = newPass.trim();
-                localStorage.setItem('irrigation_admin_pass', adminPassword);
-                alert("पासवर्ड बदल दिया गया!");
+                alert("पासवर्ड बदल दिया गया! कृपया 'क्लाउड पर सेव करें' बटन दबाएं।");
             }
         } else if(oldPass !== null) {
             alert("पुराना पासवर्ड गलत है!");
         }
     }
 
-    // AUTO SAVE DATE & GAP
-    function autoSaveDateSettings() {
-        let dateVal = document.getElementById('startDateInput').value;
-        let gapVal = document.getElementById('intervalInput').value;
-
-        localStorage.setItem('saved_start_date', dateVal);
-        localStorage.setItem('saved_gap_days', gapVal);
-
-        generate30DaysCalendar();
-    }
-
-    // SAVE ALL DATA (TABLE + DATES)
-    function saveAllData() {
-        localStorage.setItem('irrigation_user_data', JSON.stringify(initialData));
-        autoSaveDateSettings();
-        alert("✅ सभी बदलाव सफलतापूर्वक सेव हो गए हैं!");
-    }
-
-    function resetToDefault() {
-        if(confirm("क्या आप सारा डेटा रिसेट करना चाहते हैं?")) {
-            localStorage.removeItem('irrigation_user_data');
-            initialData = JSON.parse(JSON.stringify(defaultData));
-            renderTable();
-            alert("डेटा रिसेट कर दिया गया है!");
-        }
-    }
-
     function generate30DaysCalendar() {
         let startVal = document.getElementById('startDateInput').value;
         let gapDays = parseInt(document.getElementById('intervalInput').value);
-
         if(isNaN(gapDays) || gapDays < 1) gapDays = 1;
-
         if(!startVal) return;
 
         waterDates = [];
         let startDateObj = new Date(startVal);
-        
         let tempDate = new Date(startDateObj);
         for(let i = 0; i < 15; i++) {
             let dateStr = tempDate.toLocaleDateString('hi-IN', { day: '2-digit', month: 'short', year: 'numeric' });
             waterDates.push(dateStr);
             tempDate.setDate(tempDate.getDate() + gapDays);
         }
-
         renderDatesList();
         findMyTurn();
     }
@@ -397,10 +400,8 @@
         let mins = parseInt(parts[1], 10);
         let secs = parseInt(parts[2], 10) || 0;
         let ampm = parts[3] ? parts[3].toUpperCase() : 'AM';
-
         if (ampm === 'PM' && hrs < 12) hrs += 12;
         if (ampm === 'AM' && hrs === 12) hrs = 0;
-
         let d = new Date();
         d.setHours(hrs, mins, secs, 0);
         return d;
@@ -413,10 +414,7 @@
         let ampm = hrs >= 12 ? 'PM' : 'AM';
         hrs = hrs % 12;
         hrs = hrs ? hrs : 12;
-        let hrsStr = hrs < 10 ? '0' + hrs : hrs;
-        let minsStr = mins < 10 ? '0' + mins : mins;
-        let secsStr = secs < 10 ? '0' + secs : secs;
-        return `${hrsStr}:${minsStr}:${secsStr} ${ampm}`;
+        return `${hrs < 10 ? '0' + hrs : hrs}:${mins < 10 ? '0' + mins : mins}:${secs < 10 ? '0' + secs : secs} ${ampm}`;
     }
 
     function formatHM(totalMinutes) {
@@ -448,7 +446,6 @@
         initialData.forEach((row, i) => {
             let bigha = parseFloat(row.bigha) || 0;
             let extra = parseFloat(row.extra) || 0;
-            
             let min = totalBigha > 0 ? (bigha / totalBigha) * totalDistMinutes : 0;
             grandTotalMinutes += min;
             totalExtraMinutes += extra;
@@ -457,7 +454,6 @@
             if(rowTR) {
                 rowTR.querySelector('.col-min').innerText = min.toFixed(2);
                 rowTR.querySelector('.col-hm').innerText = formatHM(min);
-
                 let startFormatted = formatTimeStr(currentStartTime);
                 rowTR.querySelector('.col-from').innerText = startFormatted;
 
@@ -490,7 +486,6 @@
     function findMyTurn() {
         let idx = document.getElementById('userSelect').value;
         let resultDiv = document.getElementById('turnResult');
-
         document.querySelectorAll('#tableBody tr').forEach(r => r.classList.remove('highlight-row'));
 
         if(idx === "") {
@@ -517,22 +512,11 @@
     }
 
     window.onload = function() {
-        let savedDate = localStorage.getItem('saved_start_date');
-        let savedGap = localStorage.getItem('saved_gap_days');
-
-        if(savedDate) {
-            document.getElementById('startDateInput').value = savedDate;
-        } else {
-            let today = new Date().toISOString().split('T')[0];
-            document.getElementById('startDateInput').value = today;
-        }
-
-        if(savedGap) {
-            document.getElementById('intervalInput').value = savedGap;
-        }
-
+        let today = new Date().toISOString().split('T')[0];
+        document.getElementById('startDateInput').value = today;
         generate30DaysCalendar();
         renderTable();
+        loadDataFromCloud();
     };
 </script>
 
