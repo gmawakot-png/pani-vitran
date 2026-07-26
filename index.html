@@ -66,7 +66,7 @@
             font-size: 13px;
         }
         .input-group input, .input-group select {
-            width: 150px;
+            width: 160px;
             padding: 6px 8px;
             font-size: 13px;
             border: 1px solid #ccc;
@@ -85,12 +85,12 @@
         }
         .result-box {
             margin-top: 10px;
-            padding: 10px;
+            padding: 12px;
             background: #ffffff;
-            border: 1px solid #27ae60;
-            border-radius: 5px;
-            font-size: 13px;
-            line-height: 1.5;
+            border: 2px solid #27ae60;
+            border-radius: 6px;
+            font-size: 14px;
+            line-height: 1.6;
         }
 
         .summary-table {
@@ -108,7 +108,6 @@
             color: #c0392b;
         }
         
-        /* Table Scroll for Mobile */
         .table-responsive {
             width: 100%;
             overflow-x: auto;
@@ -169,8 +168,31 @@
             font-weight: bold;
         }
 
+        .btn-view-chart {
+            background: #2980b9;
+            color: #fff;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 8px;
+            width: 100%;
+        }
+
+        .full-chart-box {
+            display: none;
+            margin-top: 10px;
+            padding: 10px;
+            background: #fcf3cf;
+            border: 1px solid #f1c40f;
+            border-radius: 5px;
+            font-size: 12px;
+        }
+
         @media print {
-            .search-card, .toggle-admin-btn, .admin-only { display: none !important; }
+            .search-card, .toggle-admin-btn, .admin-only, .btn-view-chart { display: none !important; }
             body { background: white; padding: 0; }
             .container { box-shadow: none; border: none; width: 100%; max-width: 100%; }
         }
@@ -185,21 +207,28 @@
     </h2>
 
     <div class="top-section">
-        <!-- Date & Water Turn Selection -->
+        <!-- Main Quick Turn Box -->
         <div class="search-card">
-            <h3>📅 पानी की बारी एवं तारीख (Schedule)</h3>
-            <div class="input-group">
-                <label for="turnDate">सिंचाई तारीख चुनें:</label>
-                <input type="date" id="turnDate" onchange="calculateAll(); findMyTurn();">
-            </div>
+            <h3>💧 पानी की अगली बारी की जानकारी</h3>
             <div class="input-group">
                 <label for="userSelect">अपना नाम चुनें:</label>
                 <select id="userSelect" onchange="findMyTurn()">
                     <option value="">-- नाम चुनें --</option>
                 </select>
             </div>
+            
             <div id="turnResult" class="result-box">
-                👉 कृपया तारीख और अपना नाम चुनकर पानी की बारी देखें।
+                👉 कृपया अपना नाम चुनकर वर्तमान और अगली बारी देखें।
+            </div>
+
+            <!-- Full Monthly Schedule Toggle Button -->
+            <button class="btn-view-chart" onclick="toggleFullChart()">📅 पूरे महीने की सिंचाई तारीखें (Full Chart)</button>
+
+            <div id="fullChartBox" class="full-chart-box">
+                <b>🗓️ तय की गई आगामी पानी की तारीखें:</b>
+                <ul id="datesList" style="margin: 5px 0; padding-left: 20px;">
+                    <!-- Dates populated via JS -->
+                </ul>
             </div>
         </div>
 
@@ -239,6 +268,10 @@
                 <label for="startTime">शुरुआती समय (Start Time):</label>
                 <input type="text" id="startTime" value="07:00:00 AM" onchange="calculateAll()">
             </div>
+            <div class="input-group">
+                <label for="monthDatesInput">महीने की तारीखें (Comma से अलग करें):</label>
+                <input type="text" id="monthDatesInput" value="26 July 2026, 28 July 2026, 01 Aug 2026, 04 Aug 2026, 08 Aug 2026" onchange="updateMonthDates()">
+            </div>
             <button class="btn-action" onclick="addRow()">+ नया नाम जोड़ें</button>
             <button class="btn-action" style="background:#8e44ad;" onclick="changeAdminPassword()">🔑 पासवर्ड बदलें</button>
         </div>
@@ -254,8 +287,8 @@
                     <th class="red-txt">मिनट</th>
                     <th class="red-txt">घंटे /मिनट</th>
                     <th class="red-txt">अतिरिक्त समय</th>
-                    <th class="red-txt">से (शुरू)</th>
-                    <th class="red-txt">तक (समाप्त)</th>
+                    <th class="red-txt">से (शुरुआत)</th>
+                    <th class="red-txt">तक (समाप्ति)</th>
                     <th>धनराशी</th>
                     <th>रू० प्राप्त तारीख</th>
                     <th class="admin-only">कार्रवाई</th>
@@ -277,13 +310,22 @@
     </div>
 
     <div style="text-align:center; font-size:12px; color:#666;">
-        📱 मोबाइल पर पूरी टेबल देखने के लिए तालिका को दाएं-बाएं (Left-Right) खिसकाएं।
+        📱 मोबाइल पर पूरी टेबल देखने के लिए तालिका को बाएं-दाएं खिसकाएं।
     </div>
 </div>
 
 <script>
     let isAdmin = false;
     let adminPassword = localStorage.getItem('irrigation_admin_pass') || "1234";
+
+    // Master Water Schedule Dates set by Admin
+    let waterDates = [
+        "26 July 2026",
+        "28 July 2026",
+        "01 Aug 2026",
+        "04 Aug 2026",
+        "08 Aug 2026"
+    ];
 
     let initialData = [
         { name: "श्री जितेन्द्र सिंह नेगी", bigha: 7, extra: 40, amount: "", date: "" },
@@ -310,7 +352,7 @@
         let pass = prompt("एडमिन पासवर्ड दर्ज करें:");
         if(pass === adminPassword) {
             isAdmin = !isAdmin;
-            alert(isAdmin ? "एडमिन मोड चालू! अब आप बदलाव कर सकते हैं।" : "व्यू मोड (Read-Only) चालू।");
+            alert(isAdmin ? "एडमिन मोड चालू!" : "व्यू मोड (Read-Only) चालू।");
             renderTable();
         } else if(pass !== null) {
             alert("गलत पासवर्ड!");
@@ -324,13 +366,33 @@
             if(newPass && newPass.trim() !== "") {
                 adminPassword = newPass.trim();
                 localStorage.setItem('irrigation_admin_pass', adminPassword);
-                alert("पासवर्ड सफलतापूर्वक बदल दिया गया है!");
-            } else {
-                alert("पासवर्ड खाली नहीं हो सकता!");
+                alert("पासवर्ड बदल दिया गया है!");
             }
         } else if(oldPass !== null) {
             alert("पुराना पासवर्ड गलत है!");
         }
+    }
+
+    function updateMonthDates() {
+        let rawVal = document.getElementById('monthDatesInput').value;
+        waterDates = rawVal.split(',').map(s => s.trim()).filter(s => s !== "");
+        renderDatesList();
+        findMyTurn();
+    }
+
+    function renderDatesList() {
+        let listEl = document.getElementById('datesList');
+        listEl.innerHTML = "";
+        waterDates.forEach(d => {
+            let li = document.createElement('li');
+            li.innerText = d;
+            listEl.appendChild(li);
+        });
+    }
+
+    function toggleFullChart() {
+        let box = document.getElementById('fullChartBox');
+        box.style.display = (box.style.display === 'block') ? 'none' : 'block';
     }
 
     function populateDropdown() {
@@ -513,13 +575,12 @@
 
     function findMyTurn() {
         let idx = document.getElementById('userSelect').value;
-        let selectedDateVal = document.getElementById('turnDate').value;
         let resultDiv = document.getElementById('turnResult');
 
         document.querySelectorAll('#tableBody tr').forEach(r => r.classList.remove('highlight-row'));
 
         if(idx === "") {
-            resultDiv.innerHTML = "👉 कृपया तारीख और अपना नाम चुनकर पानी की बारी देखें।";
+            resultDiv.innerHTML = "👉 कृपया अपना नाम चुनकर वर्तमान और अगली बारी देखें।";
             return;
         }
 
@@ -530,35 +591,19 @@
             targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
-        let dateDisplayStr = "";
-        let nextTurnStr = "";
-
-        if(selectedDateVal) {
-            let selDate = new Date(selectedDateVal);
-            dateDisplayStr = `<b>चुनी गई तारीख:</b> ${selDate.toLocaleDateString('hi-IN')}<br>`;
-
-            // Calculate Next Turn (+15 days default cycle as example)
-            let nextDate = new Date(selDate);
-            nextDate.setDate(nextDate.getDate() + 15);
-            nextTurnStr = `<br>📅 <b>अगली अनुमानित बारी:</b> <span style="color:#2980b9; font-weight:bold;">${nextDate.toLocaleDateString('hi-IN')}</span>`;
-        } else {
-            dateDisplayStr = "<b>तारीख:</b> (आज की सारणी)<br>";
-        }
+        let currentTurnDate = waterDates[0] || "तारीख तय नहीं";
+        let nextTurnDate = waterDates[1] || "इसके बाद की तारीख तय नहीं";
 
         resultDiv.innerHTML = `
-            💧 <b>${item.name}</b> जी की पानी की बारी:<br>
-            ${dateDisplayStr}
-            • <b>शुरू:</b> <span style="color:#196f3d; font-weight:bold;">${item.computedFrom}</span><br>
-            • <b>समाप्त:</b> <span style="color:#c0392b; font-weight:bold;">${item.computedTo}</span><br>
-            • <b>कुल समय:</b> ${item.computedDuration} (बीघा: ${item.bigha})
-            ${nextTurnStr}
+            💧 <b>${item.name} जी की अगली बारी:</b><br>
+            • <b>वर्तमान बारी तारीख:</b> <span style="color:#27ae60; font-weight:bold;">${currentTurnDate}</span><br>
+            • <b>अगली पानी की बारी:</b> <span style="color:#d35400; font-weight:bold;">${nextTurnDate}</span><br>
+            • <b>समय:</b> ${item.computedFrom} से ${item.computedTo} (${item.computedDuration})
         `;
     }
 
     window.onload = function() {
-        // Default set to today's date
-        let today = new Date().toISOString().split('T')[0];
-        document.getElementById('turnDate').value = today;
+        renderDatesList();
         renderTable();
     };
 </script>
