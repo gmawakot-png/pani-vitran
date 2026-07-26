@@ -44,7 +44,7 @@
             border-radius: 6px;
             padding: 15px;
             flex: 1;
-            min-width: 280px;
+            min-width: 320px;
         }
         .controls-card h3, .summary-card h3 {
             margin-top: 0;
@@ -58,13 +58,15 @@
             align-items: center;
             justify-content: space-between;
             margin-bottom: 10px;
+            gap: 10px;
         }
         .input-group label {
             font-weight: bold;
             font-size: 14px;
+            white-space: nowrap;
         }
         .input-group input {
-            width: 100px;
+            width: 130px;
             padding: 6px 10px;
             font-size: 14px;
             border: 1px solid #ccc;
@@ -201,8 +203,8 @@
                     <td class="val" id="displayTotalDistributionHM">11 घंटे 40 मिनट</td>
                 </tr>
                 <tr>
-                    <td>आखरी बचा समय (घंटे):</td>
-                    <td class="val" id="displayRemainingHours">0.33</td>
+                    <td>आखरी बचा समय (घंटे/मिनट):</td>
+                    <td class="val" id="displayRemainingHours">0 घंटे 20 मिनट</td>
                 </tr>
             </table>
         </div>
@@ -401,8 +403,8 @@
         let distMins = totalDistributionMinutes % 60;
         document.getElementById('displayTotalDistributionHM').innerText = `${distHrs} घंटे ${distMins < 10 ? '0' + distMins : distMins} मिनट`;
 
-        let remHours = ((totalPool * 60) - (grandTotalMinutes + totalExtraMinutes)) / 60;
-        document.getElementById('displayRemainingHours').innerText = remHours.toFixed(2);
+        let remMinutes = Math.round((totalPool * 60) - (grandTotalMinutes + totalExtraMinutes));
+        document.getElementById('displayRemainingHours').innerText = formatHM(remMinutes);
     }
 
     window.onload = renderTable;
