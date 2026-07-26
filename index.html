@@ -6,7 +6,7 @@
     <title>सिंचाई समय सारणी (Irrigation Schedule)</title>
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
-        body { background-color: #f4f7f6; margin: 0; padding: 10px; color: #333; }
+        body { background-color: #f4f7f6; margin: 0; padding: 10px; color: #333; padding-bottom: 60px; }
         .container { max-width: 1200px; margin: 0 auto; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         h2 { text-align: center; color: #1a5276; margin-top: 0; margin-bottom: 15px; border-bottom: 2px solid #1a5276; padding-bottom: 8px; font-size: 20px; }
         .top-section { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 15px; }
@@ -32,7 +32,6 @@
         
         .toggle-admin-btn { background: transparent; border: none; color: #888; font-size: 11px; float: right; cursor: pointer; }
         .btn-action { background: #27ae60; color: #fff; width: 100%; padding: 6px; margin-top: 5px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .btn-save-date { background: #2980b9; color: #fff; width: 100%; padding: 6px; margin-top: 8px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px; }
         .btn-view-chart { background: #16a085; color: #fff; border: none; padding: 8px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; margin-top: 8px; width: 100%; }
         .full-chart-box { display: none; margin-top: 10px; padding: 10px; background: #fcf3cf; border: 1px solid #f1c40f; border-radius: 5px; font-size: 12px; max-height: 250px; overflow-y: auto; }
         
@@ -44,6 +43,25 @@
             margin-bottom: 5px;
             border: 2px solid #27ae60;
         }
+
+        /* FLOATING SAVE BUTTON FOR ADMIN */
+        .floating-save-btn {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #2980b9;
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 30px;
+            border: none;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            cursor: pointer;
+            z-index: 1000;
+            display: none;
+        }
+        .floating-save-btn:hover { background: #1f618d; }
     </style>
 </head>
 <body>
@@ -66,21 +84,19 @@
                 </select>
             </div>
 
-            <!-- यह एडमिन बॉक्स केवल Admin Active होने पर ही दिखेगा -->
+            <!-- एडमिन तारीख एवं दिन का गैप इनपुट -->
             <div class="admin-date-controls admin-only" id="directAdminDateBox">
                 <b style="color:#1e8449; font-size:12px;">⚙️ वर्तमान तारीख व दिन का अंतर (गैप) बदलें:</b>
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px; gap:8px;">
                     <div>
                         <span style="font-size:11px; font-weight:bold; display:block;">वर्तमान तारीख चुनें:</span>
-                        <input type="date" id="startDateInput" style="width:130px; padding:4px; font-size:12px; border:1px solid #27ae60; border-radius:4px; font-weight:bold;" onchange="generate30DaysCalendar()">
+                        <input type="date" id="startDateInput" style="width:130px; padding:4px; font-size:12px; border:1px solid #27ae60; border-radius:4px; font-weight:bold;" onchange="autoSaveDateSettings()">
                     </div>
                     <div>
                         <span style="font-size:11px; font-weight:bold; display:block;">दिन का गैप:</span>
-                        <input type="number" id="intervalInput" value="1" min="1" max="30" style="width:75px; padding:4px; text-align:center; font-size:13px; font-weight:bold; color:#c0392b; border:1px solid #27ae60; border-radius:4px;" oninput="generate30DaysCalendar()">
+                        <input type="number" id="intervalInput" value="1" min="1" max="30" style="width:75px; padding:4px; text-align:center; font-size:13px; font-weight:bold; color:#c0392b; border:1px solid #27ae60; border-radius:4px;" oninput="autoSaveDateSettings()">
                     </div>
                 </div>
-                <!-- SAVE BUTTON -->
-                <button class="btn-save-date" onclick="saveDateSettings()">💾 तारीख व गैप हमेशा के लिए सेव करें</button>
             </div>
             
             <div id="turnResult" class="result-box">
@@ -125,7 +141,9 @@
                 <input type="text" id="startTime" value="07:00:00 AM" onchange="calculateAll()">
             </div>
             <button class="btn-action" onclick="addRow()">+ नया नाम जोड़ें</button>
+            <button class="btn-action" style="background:#27ae60;" onclick="saveAllData()">💾 संपूर्ण डेटा सेव करें</button>
             <button class="btn-action" style="background:#8e44ad;" onclick="changeAdminPassword()">🔑 पासवर्ड बदलें</button>
+            <button class="btn-action" style="background:#e74c3c; margin-top:10px;" onclick="resetToDefault()">🔄 डेटा रिसेट करें</button>
         </div>
     </div>
 
@@ -161,13 +179,16 @@
     </div>
 </div>
 
+<!-- FLOATING SAVE BUTTON -->
+<button class="floating-save-btn" id="floatingSaveBtn" onclick="saveAllData()">💾 सभी बदलाव सेव करें</button>
+
 <script>
     let isAdmin = false;
     let adminPassword = localStorage.getItem('irrigation_admin_pass') || "1234";
 
     let waterDates = [];
 
-    let initialData = [
+    const defaultData = [
         { name: "श्री जितेन्द्र सिंह नेगी", bigha: 7, extra: 40, amount: "", date: "" },
         { name: "श्री उत्तम सिंह बिष्ट", bigha: 5, extra: "", amount: "", date: "" },
         { name: "श्री कोमल सिंह नेगी", bigha: 0.5, extra: "", amount: "", date: "" },
@@ -188,12 +209,14 @@
         { name: "श्रीमती जस्सी देवी", bigha: 3, extra: "", amount: 100, date: "25-07-2026" }
     ];
 
+    let initialData = JSON.parse(localStorage.getItem('irrigation_user_data')) || defaultData;
+
     function toggleEditMode() {
         if(!isAdmin) {
             let pass = prompt("एडमिन पासवर्ड दर्ज करें:");
             if(pass === adminPassword) {
                 isAdmin = true;
-                alert("एडमिन मोड चालू! अब आप तारीख, दिन का गैप और डेटा बदलकर सेव कर सकते हैं।");
+                alert("एडमिन मोड चालू! अब आप बदलाव करके सेव कर सकती हैं।");
                 renderTable();
             } else if(pass !== null) {
                 alert("गलत पासवर्ड!");
@@ -219,20 +242,31 @@
         }
     }
 
-    // SAVING DATE & GAP PERMANENTLY
-    function saveDateSettings() {
+    // AUTO SAVE DATE & GAP
+    function autoSaveDateSettings() {
         let dateVal = document.getElementById('startDateInput').value;
         let gapVal = document.getElementById('intervalInput').value;
-
-        if(!dateVal) {
-            alert("कृपया सही तारीख चुनें!");
-            return;
-        }
 
         localStorage.setItem('saved_start_date', dateVal);
         localStorage.setItem('saved_gap_days', gapVal);
 
-        alert("✅ तारीख और दिन का अंतर सफलतापूर्वक सेव हो गया है!");
+        generate30DaysCalendar();
+    }
+
+    // SAVE ALL DATA (TABLE + DATES)
+    function saveAllData() {
+        localStorage.setItem('irrigation_user_data', JSON.stringify(initialData));
+        autoSaveDateSettings();
+        alert("✅ सभी बदलाव सफलतापूर्वक सेव हो गए हैं!");
+    }
+
+    function resetToDefault() {
+        if(confirm("क्या आप सारा डेटा रिसेट करना चाहते हैं?")) {
+            localStorage.removeItem('irrigation_user_data');
+            initialData = JSON.parse(JSON.stringify(defaultData));
+            renderTable();
+            alert("डेटा रिसेट कर दिया गया है!");
+        }
     }
 
     function generate30DaysCalendar() {
@@ -297,6 +331,7 @@
             }
         });
 
+        document.getElementById('floatingSaveBtn').style.display = isAdmin ? 'block' : 'none';
         document.getElementById('editToggleBtn').innerText = isAdmin ? "🔓 Admin Active" : "🔐 Admin Edit";
 
         initialData.forEach((row, index) => {
@@ -481,7 +516,6 @@
         `;
     }
 
-    // ON LOAD: RETRIEVE SAVED VALUES
     window.onload = function() {
         let savedDate = localStorage.getItem('saved_start_date');
         let savedGap = localStorage.getItem('saved_gap_days');
