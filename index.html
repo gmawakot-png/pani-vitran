@@ -157,6 +157,18 @@
             cursor: pointer;
         }
 
+        .btn-action {
+            background: #27ae60;
+            color: #fff;
+            width: 100%;
+            padding: 6px;
+            margin-top: 5px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
         @media print {
             .search-card, .toggle-admin-btn, .admin-only { display: none !important; }
             body { background: white; padding: 0; }
@@ -173,9 +185,13 @@
     </h2>
 
     <div class="top-section">
-        <!-- 1-Step User Turn Tracker -->
+        <!-- Date & Water Turn Selection -->
         <div class="search-card">
-            <h3>🔍 अपनी अगली बारी देखें</h3>
+            <h3>📅 पानी की बारी एवं तारीख (Schedule)</h3>
+            <div class="input-group">
+                <label for="turnDate">सिंचाई तारीख चुनें:</label>
+                <input type="date" id="turnDate" onchange="calculateAll(); findMyTurn();">
+            </div>
             <div class="input-group">
                 <label for="userSelect">अपना नाम चुनें:</label>
                 <select id="userSelect" onchange="findMyTurn()">
@@ -183,7 +199,7 @@
                 </select>
             </div>
             <div id="turnResult" class="result-box">
-                👉 कृपया अपना नाम चुनकर पानी की बारी और समय देखें।
+                👉 कृपया तारीख और अपना नाम चुनकर पानी की बारी देखें।
             </div>
         </div>
 
@@ -210,7 +226,7 @@
         </div>
 
         <div class="controls-card admin-only" id="adminControls">
-            <h3>एडमिन सैटिंग्स (Admin Only)</h3>
+            <h3>एडमिन सेटिंग्स (Admin Only)</h3>
             <div class="input-group">
                 <label for="totalPoolHours">कुल उपलब्ध पानी घंटे (Pool):</label>
                 <input type="number" id="totalPoolHours" value="12" step="0.1" oninput="calculateAll()">
@@ -223,7 +239,8 @@
                 <label for="startTime">शुरुआती समय (Start Time):</label>
                 <input type="text" id="startTime" value="07:00:00 AM" onchange="calculateAll()">
             </div>
-            <button class="btn" style="background:#27ae60; color:#fff; width:100%; padding:6px; margin-top:5px; border:none; border-radius:4px; cursor:pointer;" onclick="addRow()">+ नया नाम जोड़ें</button>
+            <button class="btn-action" onclick="addRow()">+ नया नाम जोड़ें</button>
+            <button class="btn-action" style="background:#8e44ad;" onclick="changeAdminPassword()">🔑 पासवर्ड बदलें</button>
         </div>
     </div>
 
@@ -266,6 +283,7 @@
 
 <script>
     let isAdmin = false;
+    let adminPassword = localStorage.getItem('irrigation_admin_pass') || "1234";
 
     let initialData = [
         { name: "श्री जितेन्द्र सिंह नेगी", bigha: 7, extra: 40, amount: "", date: "" },
@@ -289,13 +307,29 @@
     ];
 
     function toggleEditMode() {
-        let pass = prompt("एडमिन पासवर्ड दर्ज करें (Default Password: 1234):");
-        if(pass === "1234") {
+        let pass = prompt("एडमिन पासवर्ड दर्ज करें:");
+        if(pass === adminPassword) {
             isAdmin = !isAdmin;
             alert(isAdmin ? "एडमिन मोड चालू! अब आप बदलाव कर सकते हैं।" : "व्यू मोड (Read-Only) चालू।");
             renderTable();
         } else if(pass !== null) {
             alert("गलत पासवर्ड!");
+        }
+    }
+
+    function changeAdminPassword() {
+        let oldPass = prompt("वर्तमान पासवर्ड दर्ज करें:");
+        if(oldPass === adminPassword) {
+            let newPass = prompt("नया पासवर्ड दर्ज करें:");
+            if(newPass && newPass.trim() !== "") {
+                adminPassword = newPass.trim();
+                localStorage.setItem('irrigation_admin_pass', adminPassword);
+                alert("पासवर्ड सफलतापूर्वक बदल दिया गया है!");
+            } else {
+                alert("पासवर्ड खाली नहीं हो सकता!");
+            }
+        } else if(oldPass !== null) {
+            alert("पुराना पासवर्ड गलत है!");
         }
     }
 
@@ -479,12 +513,13 @@
 
     function findMyTurn() {
         let idx = document.getElementById('userSelect').value;
+        let selectedDateVal = document.getElementById('turnDate').value;
         let resultDiv = document.getElementById('turnResult');
 
         document.querySelectorAll('#tableBody tr').forEach(r => r.classList.remove('highlight-row'));
 
         if(idx === "") {
-            resultDiv.innerHTML = "👉 कृपया अपना नाम चुनकर पानी की बारी और समय देखें।";
+            resultDiv.innerHTML = "👉 कृपया तारीख और अपना नाम चुनकर पानी की बारी देखें।";
             return;
         }
 
@@ -495,15 +530,37 @@
             targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
+        let dateDisplayStr = "";
+        let nextTurnStr = "";
+
+        if(selectedDateVal) {
+            let selDate = new Date(selectedDateVal);
+            dateDisplayStr = `<b>चुनी गई तारीख:</b> ${selDate.toLocaleDateString('hi-IN')}<br>`;
+
+            // Calculate Next Turn (+15 days default cycle as example)
+            let nextDate = new Date(selDate);
+            nextDate.setDate(nextDate.getDate() + 15);
+            nextTurnStr = `<br>📅 <b>अगली अनुमानित बारी:</b> <span style="color:#2980b9; font-weight:bold;">${nextDate.toLocaleDateString('hi-IN')}</span>`;
+        } else {
+            dateDisplayStr = "<b>तारीख:</b> (आज की सारणी)<br>";
+        }
+
         resultDiv.innerHTML = `
-            💧 <b>${item.name}</b> जी की अगली बारी:<br>
+            💧 <b>${item.name}</b> जी की पानी की बारी:<br>
+            ${dateDisplayStr}
             • <b>शुरू:</b> <span style="color:#196f3d; font-weight:bold;">${item.computedFrom}</span><br>
             • <b>समाप्त:</b> <span style="color:#c0392b; font-weight:bold;">${item.computedTo}</span><br>
             • <b>कुल समय:</b> ${item.computedDuration} (बीघा: ${item.bigha})
+            ${nextTurnStr}
         `;
     }
 
-    window.onload = renderTable;
+    window.onload = function() {
+        // Default set to today's date
+        let today = new Date().toISOString().split('T')[0];
+        document.getElementById('turnDate').value = today;
+        renderTable();
+    };
 </script>
 
 </body>
