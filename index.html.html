@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>सिंचाई समय सारणी (Irrigation Schedule)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }
+        body {
+            background-color: #f4f7f6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        h2 {
+            text-align: center;
+            color: #1a5276;
+            margin-top: 0;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #1a5276;
+            padding-bottom: 10px;
+        }
+        .top-section {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .controls-card, .summary-card {
+            background: #eef5f9;
+            border: 1px solid #b8daff;
+            border-radius: 6px;
+            padding: 15px;
+            flex: 1;
+            min-width: 280px;
+        }
+        .controls-card h3, .summary-card h3 {
+            margin-top: 0;
+            color: #0c5460;
+            font-size: 16px;
+            border-bottom: 1px solid #b8daff;
+            padding-bottom: 5px;
+        }
+        .input-group {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+        .input-group label {
+            font-weight: bold;
+            font-size: 14px;
+        }
+        .input-group input {
+            width: 100px;
+            padding: 6px 10px;
+            font-size: 14px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            text-align: right;
+            font-weight: bold;
+        }
+        .summary-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .summary-table td {
+            padding: 6px 8px;
+            font-size: 14px;
+            border-bottom: 1px dashed #cbd5e1;
+        }
+        .summary-table tr:last-child td {
+            border-bottom: none;
+        }
+        .summary-table td.val {
+            text-align: right;
+            font-weight: bold;
+            color: #c0392b;
+        }
+        
+        .action-bar {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        .btn {
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: bold;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-add { background: #27ae60; color: white; }
+        .btn-add:hover { background: #219653; }
+        .btn-print { background: #2980b9; color: white; }
+        .btn-print:hover { background: #1f618d; }
+
+        table.main-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 15px;
+            font-size: 13px;
+        }
+        table.main-table th, table.main-table td {
+            border: 1px solid #7f8c8d;
+            padding: 6px 8px;
+            text-align: center;
+        }
+        table.main-table th {
+            background-color: #f2f2f2;
+            font-weight: bold;
+        }
+        table.main-table th.red-txt, table.main-table td.red-txt {
+            color: #c0392b;
+        }
+        table.main-table td input[type="text"], table.main-table td input[type="number"] {
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-size: 13px;
+            text-align: inherit;
+            box-sizing: border-box;
+        }
+        table.main-table td input[type="text"]:focus, table.main-table td input[type="number"]:focus {
+            background: #fff8dc;
+            outline: 1px solid #2980b9;
+        }
+        .btn-del {
+            background: #e74c3c;
+            color: white;
+            border: none;
+            padding: 3px 8px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 11px;
+        }
+        .btn-del:hover { background: #c0392b; }
+
+        tr.total-row {
+            background-color: #eaeded;
+            font-weight: bold;
+        }
+
+        @media print {
+            .action-bar, .btn-del-col, .btn-del { display: none !important; }
+            body { background: white; padding: 0; }
+            .container { box-shadow: none; border: none; width: 100%; max-width: 100%; }
+            input { border: none !important; background: transparent !important; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>पानी सिंचाई वितरण सारणी</h2>
+
+    <div class="top-section">
+        <div class="controls-card">
+            <h3>पैरामीटर सेटिंग्स</h3>
+            <div class="input-group">
+                <label for="totalPoolHours">कुल उपलब्ध पानी घंटे (Pool):</label>
+                <input type="number" id="totalPoolHours" value="12" step="0.1" oninput="calculateAll()">
+            </div>
+            <div class="input-group">
+                <label for="hoursToDistribute">कुल घंटे बाँटने हैं:</label>
+                <input type="number" id="hoursToDistribute" value="11" step="0.1" oninput="calculateAll()">
+            </div>
+            <div class="input-group">
+                <label for="startTime">शुरुआती समय (Start Time):</label>
+                <input type="text" id="startTime" value="07:00:00 AM" onchange="calculateAll()">
+            </div>
+        </div>
+
+        <div class="summary-card">
+            <h3>सारांश (Summary)</h3>
+            <table class="summary-table">
+                <tr>
+                    <td>कुल बीघा:</td>
+                    <td class="val" id="sumBigha">45</td>
+                </tr>
+                <tr>
+                    <td>कुल बांटे घंटे मिनट:</td>
+                    <td class="val" id="displayDistributedHM">11 घंटे 00 मिनट</td>
+                </tr>
+                <tr>
+                    <td>कुल पानी वितरण समय:</td>
+                    <td class="val" id="displayTotalDistributionHM">11 घंटे 40 मिनट</td>
+                </tr>
+                <tr>
+                    <td>आखरी बचा समय (घंटे):</td>
+                    <td class="val" id="displayRemainingHours">0.33</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+
+    <div class="action-bar">
+        <button class="btn btn-add" onclick="addRow()">+ नया नाम जोड़ें</button>
+        <button class="btn btn-print" onclick="window.print()">🖨️ प्रिंट निकालें / PDF बनाएं</button>
+    </div>
+
+    <table class="main-table" id="scheduleTable">
+        <thead>
+            <tr>
+                <th style="width: 45px;">S.No</th>
+                <th>नाम</th>
+                <th style="width: 70px;">बीघा</th>
+                <th class="red-txt" style="width: 90px;">मिनट</th>
+                <th class="red-txt" style="width: 130px;">घंटे /मिनट</th>
+                <th class="red-txt" style="width: 100px;">अतिरिक्त समय</th>
+                <th class="red-txt" style="width: 110px;">से</th>
+                <th class="red-txt" style="width: 110px;">तक</th>
+                <th style="width: 80px;">धनराशी</th>
+                <th style="width: 110px;">रू० प्राप्त तारीख</th>
+                <th class="btn-del-col" style="width: 50px;">हटाएं</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <!-- Dynamic Rows -->
+        </tbody>
+        <tfoot>
+            <tr class="total-row">
+                <td colspan="2">कुल</td>
+                <td id="totalBighaFoot">45</td>
+                <td id="totalMinFoot">660</td>
+                <td id="totalHMFoot">11 घंटे 0 मिनट</td>
+                <td colspan="6"></td>
+            </tr>
+        </tfoot>
+    </table>
+</div>
+
+<script>
+    let initialData = [
+        { name: "श्री जितेन्द्र सिंह नेगी", bigha: 7, extra: 40, amount: "", date: "" },
+        { name: "श्री उत्तम सिंह बिष्ट", bigha: 5, extra: "", amount: "", date: "" },
+        { name: "श्री कोमल सिंह नेगी", bigha: 0.5, extra: "", amount: "", date: "" },
+        { name: "श्री राजेश कुमार जी", bigha: 2, extra: "", amount: "", date: "" },
+        { name: "श्री कांता डबराल जी", bigha: 0.5, extra: "", amount: "", date: "" },
+        { name: "श्रीमती बसंती देवी", bigha: 1, extra: "", amount: "", date: "" },
+        { name: "श्री विपिन खंतवाल", bigha: 3, extra: "", amount: "", date: "" },
+        { name: "श्रीमती उषा देवी", bigha: 2, extra: "", amount: "", date: "" },
+        { name: "श्रीमती अंजू देवी", bigha: 2, extra: "", amount: "", date: "" },
+        { name: "गणेश", bigha: 3, extra: "", amount: "", date: "" },
+        { name: "श्रीमती गीता देवी", bigha: 2, extra: "", amount: "", date: "" },
+        { name: "श्रीमती मनीषा देवी", bigha: 2, extra: "", amount: "", date: "" },
+        { name: "श्री राजू बिष्ट", bigha: 7, extra: "", amount: "", date: "" },
+        { name: "श्रीमती मनीषा देवी २", bigha: 2, extra: "", amount: "", date: "" },
+        { name: "श्रीमती पिंकी देवी", bigha: 2, extra: "", amount: "", date: "" },
+        { name: "श्री मस्तान सिंह जी", bigha: 0.5, extra: "", amount: "", date: "" },
+        { name: "श्रीमती पुनीता देवी", bigha: 0.5, extra: "", amount: "", date: "" },
+        { name: "श्रीमती जस्सी देवी", bigha: 3, extra: "", amount: 100, date: "25-07-2026" }
+    ];
+
+    function renderTable() {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
+        initialData.forEach((row, index) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+                <td>${index + 1}</td>
+                <td style="text-align: left;"><input type="text" value="${row.name}" oninput="updateData(${index}, 'name', this.value)"></td>
+                <td><input type="number" value="${row.bigha}" step="0.1" style="text-align:center;" oninput="updateData(${index}, 'bigha', parseFloat(this.value)||0)"></td>
+                <td class="col-min">0</td>
+                <td class="col-hm">0</td>
+                <td><input type="number" value="${row.extra}" style="text-align:center;" placeholder="-" oninput="updateData(${index}, 'extra', parseFloat(this.value)||0)"></td>
+                <td class="col-from">-</td>
+                <td class="col-to">-</td>
+                <td><input type="text" value="${row.amount}" style="text-align:center;" oninput="updateData(${index}, 'amount', this.value)"></td>
+                <td><input type="text" value="${row.date}" style="text-align:center;" oninput="updateData(${index}, 'date', this.value)"></td>
+                <td class="btn-del-col"><button class="btn-del" onclick="deleteRow(${index})">X</button></td>
+            `;
+            tbody.appendChild(tr);
+        });
+        calculateAll();
+    }
+
+    function updateData(index, field, value) {
+        initialData[index][field] = value;
+        calculateAll();
+    }
+
+    function addRow() {
+        initialData.push({ name: "नया व्यक्ति", bigha: 1, extra: "", amount: "", date: "" });
+        renderTable();
+    }
+
+    function deleteRow(index) {
+        if(initialData.length <= 1) {
+            alert("कम से कम एक रो होना आवश्यक है!");
+            return;
+        }
+        initialData.splice(index, 1);
+        renderTable();
+    }
+
+    function parseTimeStr(timeStr) {
+        let parts = timeStr.trim().split(/[: ]/);
+        if(parts.length < 3) return new Date();
+        let hrs = parseInt(parts[0], 10);
+        let mins = parseInt(parts[1], 10);
+        let secs = parseInt(parts[2], 10) || 0;
+        let ampm = parts[3] ? parts[3].toUpperCase() : 'AM';
+
+        if (ampm === 'PM' && hrs < 12) hrs += 12;
+        if (ampm === 'AM' && hrs === 12) hrs = 0;
+
+        let d = new Date();
+        d.setHours(hrs, mins, secs, 0);
+        return d;
+    }
+
+    function formatTimeStr(dateObj) {
+        let hrs = dateObj.getHours();
+        let mins = dateObj.getMinutes();
+        let secs = dateObj.getSeconds();
+        let ampm = hrs >= 12 ? 'PM' : 'AM';
+        hrs = hrs % 12;
+        hrs = hrs ? hrs : 12;
+        let hrsStr = hrs < 10 ? '0' + hrs : hrs;
+        let minsStr = mins < 10 ? '0' + mins : mins;
+        let secsStr = secs < 10 ? '0' + secs : secs;
+        return `${hrsStr}:${minsStr}:${secsStr} ${ampm}`;
+    }
+
+    function formatHM(totalMinutes) {
+        let roundedMin = Math.round(totalMinutes);
+        let hrs = Math.floor(roundedMin / 60);
+        let mins = roundedMin % 60;
+        if(hrs > 0) {
+            return `${hrs} घंटे ${mins} मिनट`;
+        } else {
+            return `${mins} मिनट`;
+        }
+    }
+
+    function calculateAll() {
+        let totalPool = parseFloat(document.getElementById('totalPoolHours').value) || 12;
+        let hoursToDist = parseFloat(document.getElementById('hoursToDistribute').value) || 0;
+        let startStr = document.getElementById('startTime').value;
+
+        let totalBigha = initialData.reduce((sum, r) => sum + (parseFloat(r.bigha) || 0), 0);
+        document.getElementById('sumBigha').innerText = totalBigha;
+        document.getElementById('totalBighaFoot').innerText = totalBigha;
+
+        let totalDistMinutes = hoursToDist * 60;
+        document.getElementById('displayDistributedHM').innerText = formatHM(totalDistMinutes);
+
+        let currentStartTime = parseTimeStr(startStr);
+        let firstStartTime = new Date(currentStartTime.getTime());
+
+        let rows = document.querySelectorAll('#tableBody tr');
+        let grandTotalMinutes = 0;
+        let totalExtraMinutes = 0;
+
+        initialData.forEach((row, i) => {
+            let bigha = parseFloat(row.bigha) || 0;
+            let extra = parseFloat(row.extra) || 0;
+            
+            let min = totalBigha > 0 ? (bigha / totalBigha) * totalDistMinutes : 0;
+            grandTotalMinutes += min;
+            totalExtraMinutes += extra;
+
+            let rowTR = rows[i];
+            if(rowTR) {
+                rowTR.querySelector('.col-min').innerText = min.toFixed(4);
+                rowTR.querySelector('.col-hm').innerText = formatHM(min);
+
+                let startFormatted = formatTimeStr(currentStartTime);
+                rowTR.querySelector('.col-from').innerText = startFormatted;
+
+                let totalDurationMs = (min + extra) * 60 * 1000;
+                let endTime = new Date(currentStartTime.getTime() + totalDurationMs);
+                let endFormatted = formatTimeStr(endTime);
+                rowTR.querySelector('.col-to').innerText = endFormatted;
+
+                currentStartTime = endTime;
+            }
+        });
+
+        document.getElementById('totalMinFoot').innerText = Math.round(grandTotalMinutes);
+        document.getElementById('totalHMFoot').innerText = formatHM(grandTotalMinutes);
+
+        let totalDistributionMs = currentStartTime.getTime() - firstStartTime.getTime();
+        let totalDistributionMinutes = Math.round(totalDistributionMs / (1000 * 60));
+        let distHrs = Math.floor(totalDistributionMinutes / 60);
+        let distMins = totalDistributionMinutes % 60;
+        document.getElementById('displayTotalDistributionHM').innerText = `${distHrs} घंटे ${distMins < 10 ? '0' + distMins : distMins} मिनट`;
+
+        let remHours = ((totalPool * 60) - (grandTotalMinutes + totalExtraMinutes)) / 60;
+        document.getElementById('displayRemainingHours').innerText = remHours.toFixed(2);
+    }
+
+    window.onload = renderTable;
+</script>
+
+</body>
+</html>
