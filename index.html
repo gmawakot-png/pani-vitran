@@ -12,14 +12,14 @@
         body {
             background-color: #f4f7f6;
             margin: 0;
-            padding: 20px;
+            padding: 10px;
             color: #333;
         }
         .container {
             max-width: 1200px;
             margin: 0 auto;
             background: #fff;
-            padding: 20px 25px;
+            padding: 15px;
             border-radius: 8px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.1);
         }
@@ -27,29 +27,30 @@
             text-align: center;
             color: #1a5276;
             margin-top: 0;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
             border-bottom: 2px solid #1a5276;
-            padding-bottom: 10px;
+            padding-bottom: 8px;
+            font-size: 20px;
         }
+        
         .top-section {
             display: flex;
             flex-wrap: wrap;
-            justify-content: space-between;
-            gap: 20px;
-            margin-bottom: 20px;
+            gap: 15px;
+            margin-bottom: 15px;
         }
-        .controls-card, .summary-card {
+        .controls-card, .summary-card, .search-card {
             background: #eef5f9;
             border: 1px solid #b8daff;
             border-radius: 6px;
-            padding: 15px;
+            padding: 12px;
             flex: 1;
-            min-width: 320px;
+            min-width: 280px;
         }
-        .controls-card h3, .summary-card h3 {
+        .controls-card h3, .summary-card h3, .search-card h3 {
             margin-top: 0;
             color: #0c5460;
-            font-size: 16px;
+            font-size: 15px;
             border-bottom: 1px solid #b8daff;
             padding-bottom: 5px;
         }
@@ -57,34 +58,49 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin-bottom: 10px;
-            gap: 10px;
+            margin-bottom: 8px;
+            gap: 8px;
         }
         .input-group label {
             font-weight: bold;
-            font-size: 14px;
-            white-space: nowrap;
+            font-size: 13px;
         }
-        .input-group input {
-            width: 130px;
-            padding: 6px 10px;
-            font-size: 14px;
+        .input-group input, .input-group select {
+            width: 150px;
+            padding: 6px 8px;
+            font-size: 13px;
             border: 1px solid #ccc;
             border-radius: 4px;
             text-align: right;
             font-weight: bold;
         }
+        
+        .search-card {
+            background: #e8f8f5;
+            border-color: #a3e4d7;
+        }
+        .search-card h3 {
+            color: #117a65;
+            border-color: #a3e4d7;
+        }
+        .result-box {
+            margin-top: 10px;
+            padding: 10px;
+            background: #ffffff;
+            border: 1px solid #27ae60;
+            border-radius: 5px;
+            font-size: 13px;
+            line-height: 1.5;
+        }
+
         .summary-table {
             width: 100%;
             border-collapse: collapse;
         }
         .summary-table td {
-            padding: 6px 8px;
-            font-size: 14px;
+            padding: 5px 6px;
+            font-size: 13px;
             border-bottom: 1px dashed #cbd5e1;
-        }
-        .summary-table tr:last-child td {
-            border-bottom: none;
         }
         .summary-table td.val {
             text-align: right;
@@ -92,98 +108,82 @@
             color: #c0392b;
         }
         
-        .action-bar {
+        /* Table Scroll for Mobile */
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
             margin-bottom: 15px;
-            display: flex;
-            gap: 10px;
-        }
-        .btn {
-            padding: 8px 16px;
-            font-size: 14px;
-            font-weight: bold;
-            border: none;
+            border: 1px solid #a6acaf;
             border-radius: 4px;
-            cursor: pointer;
-            transition: background 0.2s;
         }
-        .btn-add { background: #27ae60; color: white; }
-        .btn-add:hover { background: #219653; }
-        .btn-print { background: #2980b9; color: white; }
-        .btn-print:hover { background: #1f618d; }
 
         table.main-table {
             width: 100%;
+            min-width: 900px;
             border-collapse: collapse;
-            margin-bottom: 15px;
-            font-size: 13px;
+            font-size: 12px;
         }
         table.main-table th, table.main-table td {
-            border: 1px solid #7f8c8d;
-            padding: 6px 8px;
+            border: 1px solid #cbd5e1;
+            padding: 6px 5px;
             text-align: center;
+            white-space: nowrap;
         }
         table.main-table th {
-            background-color: #f2f2f2;
+            background-color: #ebedef;
             font-weight: bold;
+            color: #2c3e50;
         }
         table.main-table th.red-txt, table.main-table td.red-txt {
             color: #c0392b;
         }
-        table.main-table td input[type="text"], table.main-table td input[type="number"] {
-            width: 100%;
-            border: none;
-            background: transparent;
-            font-size: 13px;
-            text-align: inherit;
-            box-sizing: border-box;
-        }
-        table.main-table td input[type="text"]:focus, table.main-table td input[type="number"]:focus {
-            background: #fff8dc;
-            outline: 1px solid #2980b9;
-        }
-        .btn-del {
-            background: #e74c3c;
-            color: white;
-            border: none;
-            padding: 3px 8px;
-            border-radius: 3px;
-            cursor: pointer;
-            font-size: 11px;
-        }
-        .btn-del:hover { background: #c0392b; }
 
-        tr.total-row {
-            background-color: #eaeded;
+        tr.highlight-row {
+            background-color: #d4efdf !important;
             font-weight: bold;
         }
 
+        .admin-only {
+            display: none !important;
+        }
+
+        .toggle-admin-btn {
+            background: transparent;
+            border: none;
+            color: #888;
+            font-size: 11px;
+            float: right;
+            cursor: pointer;
+        }
+
         @media print {
-            .action-bar, .btn-del-col, .btn-del { display: none !important; }
+            .search-card, .toggle-admin-btn, .admin-only { display: none !important; }
             body { background: white; padding: 0; }
             .container { box-shadow: none; border: none; width: 100%; max-width: 100%; }
-            input { border: none !important; background: transparent !important; }
         }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>पानी सिंचाई वितरण सारणी</h2>
+    <h2>
+        पानी सिंचाई वितरण सारणी
+        <button class="toggle-admin-btn" onclick="toggleEditMode()" id="editToggleBtn">🔐 Admin Edit</button>
+    </h2>
 
     <div class="top-section">
-        <div class="controls-card">
-            <h3>पैरामीटर सेटिंग्स</h3>
+        <!-- 1-Step User Turn Tracker -->
+        <div class="search-card">
+            <h3>🔍 अपनी अगली बारी देखें</h3>
             <div class="input-group">
-                <label for="totalPoolHours">कुल उपलब्ध पानी घंटे (Pool):</label>
-                <input type="number" id="totalPoolHours" value="12" step="0.1" oninput="calculateAll()">
+                <label for="userSelect">अपना नाम चुनें:</label>
+                <select id="userSelect" onchange="findMyTurn()">
+                    <option value="">-- नाम चुनें --</option>
+                </select>
             </div>
-            <div class="input-group">
-                <label for="hoursToDistribute">कुल घंटे बाँटने हैं:</label>
-                <input type="number" id="hoursToDistribute" value="11" step="0.1" oninput="calculateAll()">
-            </div>
-            <div class="input-group">
-                <label for="startTime">शुरुआती समय (Start Time):</label>
-                <input type="text" id="startTime" value="07:00:00 AM" onchange="calculateAll()">
+            <div id="turnResult" class="result-box">
+                👉 कृपया अपना नाम चुनकर पानी की बारी और समय देखें।
             </div>
         </div>
 
@@ -208,45 +208,65 @@
                 </tr>
             </table>
         </div>
+
+        <div class="controls-card admin-only" id="adminControls">
+            <h3>एडमिन सैटिंग्स (Admin Only)</h3>
+            <div class="input-group">
+                <label for="totalPoolHours">कुल उपलब्ध पानी घंटे (Pool):</label>
+                <input type="number" id="totalPoolHours" value="12" step="0.1" oninput="calculateAll()">
+            </div>
+            <div class="input-group">
+                <label for="hoursToDistribute">कुल घंटे बाँटने हैं:</label>
+                <input type="number" id="hoursToDistribute" value="11" step="0.1" oninput="calculateAll()">
+            </div>
+            <div class="input-group">
+                <label for="startTime">शुरुआती समय (Start Time):</label>
+                <input type="text" id="startTime" value="07:00:00 AM" onchange="calculateAll()">
+            </div>
+            <button class="btn" style="background:#27ae60; color:#fff; width:100%; padding:6px; margin-top:5px; border:none; border-radius:4px; cursor:pointer;" onclick="addRow()">+ नया नाम जोड़ें</button>
+        </div>
     </div>
 
-    <div class="action-bar">
-        <button class="btn btn-add" onclick="addRow()">+ नया नाम जोड़ें</button>
-        <button class="btn btn-print" onclick="window.print()">🖨️ प्रिंट निकालें / PDF बनाएं</button>
+    <div class="table-responsive">
+        <table class="main-table" id="scheduleTable">
+            <thead>
+                <tr>
+                    <th style="width: 40px;">S.No</th>
+                    <th>नाम</th>
+                    <th>बीघा</th>
+                    <th class="red-txt">मिनट</th>
+                    <th class="red-txt">घंटे /मिनट</th>
+                    <th class="red-txt">अतिरिक्त समय</th>
+                    <th class="red-txt">से (शुरू)</th>
+                    <th class="red-txt">तक (समाप्त)</th>
+                    <th>धनराशी</th>
+                    <th>रू० प्राप्त तारीख</th>
+                    <th class="admin-only">कार्रवाई</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <!-- Dynamic Content -->
+            </tbody>
+            <tfoot>
+                <tr style="background:#f2f2f2; font-weight:bold;">
+                    <td colspan="2">कुल</td>
+                    <td id="totalBighaFoot">45</td>
+                    <td id="totalMinFoot">660</td>
+                    <td id="totalHMFoot">11 घंटे 0 मिनट</td>
+                    <td colspan="6"></td>
+                </tr>
+            </tfoot>
+        </table>
     </div>
 
-    <table class="main-table" id="scheduleTable">
-        <thead>
-            <tr>
-                <th style="width: 45px;">S.No</th>
-                <th>नाम</th>
-                <th style="width: 70px;">बीघा</th>
-                <th class="red-txt" style="width: 90px;">मिनट</th>
-                <th class="red-txt" style="width: 130px;">घंटे /मिनट</th>
-                <th class="red-txt" style="width: 100px;">अतिरिक्त समय</th>
-                <th class="red-txt" style="width: 110px;">से</th>
-                <th class="red-txt" style="width: 110px;">तक</th>
-                <th style="width: 80px;">धनराशी</th>
-                <th style="width: 110px;">रू० प्राप्त तारीख</th>
-                <th class="btn-del-col" style="width: 50px;">हटाएं</th>
-            </tr>
-        </thead>
-        <tbody id="tableBody">
-            <!-- Dynamic Rows -->
-        </tbody>
-        <tfoot>
-            <tr class="total-row">
-                <td colspan="2">कुल</td>
-                <td id="totalBighaFoot">45</td>
-                <td id="totalMinFoot">660</td>
-                <td id="totalHMFoot">11 घंटे 0 मिनट</td>
-                <td colspan="6"></td>
-            </tr>
-        </tfoot>
-    </table>
+    <div style="text-align:center; font-size:12px; color:#666;">
+        📱 मोबाइल पर पूरी टेबल देखने के लिए तालिका को दाएं-बाएं (Left-Right) खिसकाएं।
+    </div>
 </div>
 
 <script>
+    let isAdmin = false;
+
     let initialData = [
         { name: "श्री जितेन्द्र सिंह नेगी", bigha: 7, extra: 40, amount: "", date: "" },
         { name: "श्री उत्तम सिंह बिष्ट", bigha: 5, extra: "", amount: "", date: "" },
@@ -268,26 +288,75 @@
         { name: "श्रीमती जस्सी देवी", bigha: 3, extra: "", amount: 100, date: "25-07-2026" }
     ];
 
+    function toggleEditMode() {
+        let pass = prompt("एडमिन पासवर्ड दर्ज करें (Default Password: 1234):");
+        if(pass === "1234") {
+            isAdmin = !isAdmin;
+            alert(isAdmin ? "एडमिन मोड चालू! अब आप बदलाव कर सकते हैं।" : "व्यू मोड (Read-Only) चालू।");
+            renderTable();
+        } else if(pass !== null) {
+            alert("गलत पासवर्ड!");
+        }
+    }
+
+    function populateDropdown() {
+        const select = document.getElementById('userSelect');
+        select.innerHTML = '<option value="">-- नाम चुनें --</option>';
+        initialData.forEach((row, idx) => {
+            let opt = document.createElement('option');
+            opt.value = idx;
+            opt.innerText = row.name;
+            select.appendChild(opt);
+        });
+    }
+
     function renderTable() {
         const tbody = document.getElementById('tableBody');
         tbody.innerHTML = '';
+
+        document.querySelectorAll('.admin-only').forEach(el => {
+            el.style.display = isAdmin ? 'table-cell' : 'none';
+        });
+        document.getElementById('adminControls').style.display = isAdmin ? 'block' : 'none';
+        document.getElementById('editToggleBtn').innerText = isAdmin ? "🔓 Admin Active" : "🔐 Admin Edit";
+
         initialData.forEach((row, index) => {
             const tr = document.createElement('tr');
-            tr.innerHTML = `
-                <td>${index + 1}</td>
-                <td style="text-align: left;"><input type="text" value="${row.name}" oninput="updateData(${index}, 'name', this.value)"></td>
-                <td><input type="number" value="${row.bigha}" step="0.1" style="text-align:center;" oninput="updateData(${index}, 'bigha', parseFloat(this.value)||0)"></td>
-                <td class="col-min">0</td>
-                <td class="col-hm">0</td>
-                <td><input type="number" value="${row.extra}" style="text-align:center;" placeholder="-" oninput="updateData(${index}, 'extra', parseFloat(this.value)||0)"></td>
-                <td class="col-from">-</td>
-                <td class="col-to">-</td>
-                <td><input type="text" value="${row.amount}" style="text-align:center;" oninput="updateData(${index}, 'amount', this.value)"></td>
-                <td><input type="text" value="${row.date}" style="text-align:center;" oninput="updateData(${index}, 'date', this.value)"></td>
-                <td class="btn-del-col"><button class="btn-del" onclick="deleteRow(${index})">X</button></td>
-            `;
+            tr.id = `row-${index}`;
+
+            if(isAdmin) {
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td style="text-align: left;"><input type="text" value="${row.name}" oninput="updateData(${index}, 'name', this.value)" style="width:100%;"></td>
+                    <td><input type="number" value="${row.bigha}" step="0.1" style="width:50px; text-align:center;" oninput="updateData(${index}, 'bigha', parseFloat(this.value)||0)"></td>
+                    <td class="col-min">0</td>
+                    <td class="col-hm">0</td>
+                    <td><input type="number" value="${row.extra}" style="width:50px; text-align:center;" placeholder="-" oninput="updateData(${index}, 'extra', parseFloat(this.value)||0)"></td>
+                    <td class="col-from">-</td>
+                    <td class="col-to">-</td>
+                    <td><input type="text" value="${row.amount}" style="width:60px; text-align:center;" oninput="updateData(${index}, 'amount', this.value)"></td>
+                    <td><input type="text" value="${row.date}" style="width:80px; text-align:center;" oninput="updateData(${index}, 'date', this.value)"></td>
+                    <td class="admin-only"><button style="background:#e74c3c; color:white; border:none; border-radius:3px; cursor:pointer;" onclick="deleteRow(${index})">X</button></td>
+                `;
+            } else {
+                tr.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td style="text-align: left; font-weight:bold;">${row.name}</td>
+                    <td>${row.bigha}</td>
+                    <td class="col-min">0</td>
+                    <td class="col-hm">0</td>
+                    <td>${row.extra || '-'}</td>
+                    <td class="col-from" style="font-weight:bold; color:#196f3d;">-</td>
+                    <td class="col-to" style="font-weight:bold; color:#c0392b;">-</td>
+                    <td>${row.amount || '-'}</td>
+                    <td>${row.date || '-'}</td>
+                    <td class="admin-only"></td>
+                `;
+            }
             tbody.appendChild(tr);
         });
+
+        populateDropdown();
         calculateAll();
     }
 
@@ -302,10 +371,7 @@
     }
 
     function deleteRow(index) {
-        if(initialData.length <= 1) {
-            alert("कम से कम एक रो होना आवश्यक है!");
-            return;
-        }
+        if(initialData.length <= 1) return;
         initialData.splice(index, 1);
         renderTable();
     }
@@ -379,7 +445,7 @@
 
             let rowTR = rows[i];
             if(rowTR) {
-                rowTR.querySelector('.col-min').innerText = min.toFixed(4);
+                rowTR.querySelector('.col-min').innerText = min.toFixed(2);
                 rowTR.querySelector('.col-hm').innerText = formatHM(min);
 
                 let startFormatted = formatTimeStr(currentStartTime);
@@ -389,6 +455,10 @@
                 let endTime = new Date(currentStartTime.getTime() + totalDurationMs);
                 let endFormatted = formatTimeStr(endTime);
                 rowTR.querySelector('.col-to').innerText = endFormatted;
+
+                row.computedFrom = startFormatted;
+                row.computedTo = endFormatted;
+                row.computedDuration = formatHM(min + extra);
 
                 currentStartTime = endTime;
             }
@@ -405,6 +475,32 @@
 
         let remMinutes = Math.round((totalPool * 60) - (grandTotalMinutes + totalExtraMinutes));
         document.getElementById('displayRemainingHours').innerText = formatHM(remMinutes);
+    }
+
+    function findMyTurn() {
+        let idx = document.getElementById('userSelect').value;
+        let resultDiv = document.getElementById('turnResult');
+
+        document.querySelectorAll('#tableBody tr').forEach(r => r.classList.remove('highlight-row'));
+
+        if(idx === "") {
+            resultDiv.innerHTML = "👉 कृपया अपना नाम चुनकर पानी की बारी और समय देखें।";
+            return;
+        }
+
+        let item = initialData[idx];
+        let targetRow = document.getElementById(`row-${idx}`);
+        if(targetRow) {
+            targetRow.classList.add('highlight-row');
+            targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        resultDiv.innerHTML = `
+            💧 <b>${item.name}</b> जी की अगली बारी:<br>
+            • <b>शुरू:</b> <span style="color:#196f3d; font-weight:bold;">${item.computedFrom}</span><br>
+            • <b>समाप्त:</b> <span style="color:#c0392b; font-weight:bold;">${item.computedTo}</span><br>
+            • <b>कुल समय:</b> ${item.computedDuration} (बीघा: ${item.bigha})
+        `;
     }
 
     window.onload = renderTable;
