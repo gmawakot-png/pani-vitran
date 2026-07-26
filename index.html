@@ -5,196 +5,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>सिंचाई समय सारणी (Irrigation Schedule)</title>
     <style>
-        * {
-            box-sizing: border-box;
-            font-family: 'Segoe UI', Arial, sans-serif;
-        }
-        body {
-            background-color: #f4f7f6;
-            margin: 0;
-            padding: 10px;
-            color: #333;
-        }
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: #fff;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-        h2 {
-            text-align: center;
-            color: #1a5276;
-            margin-top: 0;
-            margin-bottom: 15px;
-            border-bottom: 2px solid #1a5276;
-            padding-bottom: 8px;
-            font-size: 20px;
-        }
+        * { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { background-color: #f4f7f6; margin: 0; padding: 10px; color: #333; }
+        .container { max-width: 1200px; margin: 0 auto; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        h2 { text-align: center; color: #1a5276; margin-top: 0; margin-bottom: 15px; border-bottom: 2px solid #1a5276; padding-bottom: 8px; font-size: 20px; }
+        .top-section { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 15px; }
+        .controls-card, .summary-card, .search-card { background: #eef5f9; border: 1px solid #b8daff; border-radius: 6px; padding: 12px; flex: 1; min-width: 280px; }
+        .controls-card h3, .summary-card h3, .search-card h3 { margin-top: 0; color: #0c5460; font-size: 15px; border-bottom: 1px solid #b8daff; padding-bottom: 5px; }
+        .input-group { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; gap: 8px; }
+        .input-group label { font-weight: bold; font-size: 13px; }
+        .input-group input, .input-group select { width: 160px; padding: 6px 8px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; text-align: right; font-weight: bold; }
+        .search-card { background: #e8f8f5; border-color: #a3e4d7; }
+        .search-card h3 { color: #117a65; border-color: #a3e4d7; }
+        .result-box { margin-top: 10px; padding: 12px; background: #ffffff; border: 2px solid #27ae60; border-radius: 6px; font-size: 14px; line-height: 1.6; }
+        .summary-table { width: 100%; border-collapse: collapse; }
+        .summary-table td { padding: 5px 6px; font-size: 13px; border-bottom: 1px dashed #cbd5e1; }
+        .summary-table td.val { text-align: right; font-weight: bold; color: #c0392b; }
+        .table-responsive { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; margin-bottom: 15px; border: 1px solid #a6acaf; border-radius: 4px; }
+        table.main-table { width: 100%; min-width: 900px; border-collapse: collapse; font-size: 12px; }
+        table.main-table th, table.main-table td { border: 1px solid #cbd5e1; padding: 6px 5px; text-align: center; white-space: nowrap; }
+        table.main-table th { background-color: #ebedef; font-weight: bold; color: #2c3e50; }
+        table.main-table th.red-txt, table.main-table td.red-txt { color: #c0392b; }
+        tr.highlight-row { background-color: #d4efdf !important; font-weight: bold; }
         
-        .top-section {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 15px;
-            margin-bottom: 15px;
-        }
-        .controls-card, .summary-card, .search-card {
-            background: #eef5f9;
-            border: 1px solid #b8daff;
+        /* FIX: Admin hidden elements class */
+        .admin-only { display: none; }
+        
+        .toggle-admin-btn { background: transparent; border: none; color: #888; font-size: 11px; float: right; cursor: pointer; }
+        .btn-action { background: #27ae60; color: #fff; width: 100%; padding: 6px; margin-top: 5px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-view-chart { background: #2980b9; color: #fff; border: none; padding: 8px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; margin-top: 8px; width: 100%; }
+        .full-chart-box { display: none; margin-top: 10px; padding: 10px; background: #fcf3cf; border: 1px solid #f1c40f; border-radius: 5px; font-size: 12px; max-height: 250px; overflow-y: auto; }
+        
+        .admin-date-controls {
+            background: #d4efdf;
+            padding: 8px 10px;
             border-radius: 6px;
-            padding: 12px;
-            flex: 1;
-            min-width: 280px;
-        }
-        .controls-card h3, .summary-card h3, .search-card h3 {
-            margin-top: 0;
-            color: #0c5460;
-            font-size: 15px;
-            border-bottom: 1px solid #b8daff;
-            padding-bottom: 5px;
-        }
-        .input-group {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            gap: 8px;
-        }
-        .input-group label {
-            font-weight: bold;
-            font-size: 13px;
-        }
-        .input-group input, .input-group select {
-            width: 160px;
-            padding: 6px 8px;
-            font-size: 13px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            text-align: right;
-            font-weight: bold;
-        }
-        
-        .search-card {
-            background: #e8f8f5;
-            border-color: #a3e4d7;
-        }
-        .search-card h3 {
-            color: #117a65;
-            border-color: #a3e4d7;
-        }
-        .result-box {
             margin-top: 10px;
-            padding: 12px;
-            background: #ffffff;
+            margin-bottom: 5px;
             border: 2px solid #27ae60;
-            border-radius: 6px;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
-        .summary-table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        .summary-table td {
-            padding: 5px 6px;
-            font-size: 13px;
-            border-bottom: 1px dashed #cbd5e1;
-        }
-        .summary-table td.val {
-            text-align: right;
-            font-weight: bold;
-            color: #c0392b;
-        }
-        
-        .table-responsive {
-            width: 100%;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            margin-bottom: 15px;
-            border: 1px solid #a6acaf;
-            border-radius: 4px;
-        }
-
-        table.main-table {
-            width: 100%;
-            min-width: 900px;
-            border-collapse: collapse;
-            font-size: 12px;
-        }
-        table.main-table th, table.main-table td {
-            border: 1px solid #cbd5e1;
-            padding: 6px 5px;
-            text-align: center;
-            white-space: nowrap;
-        }
-        table.main-table th {
-            background-color: #ebedef;
-            font-weight: bold;
-            color: #2c3e50;
-        }
-        table.main-table th.red-txt, table.main-table td.red-txt {
-            color: #c0392b;
-        }
-
-        tr.highlight-row {
-            background-color: #d4efdf !important;
-            font-weight: bold;
-        }
-
-        .admin-only {
-            display: none !important;
-        }
-
-        .toggle-admin-btn {
-            background: transparent;
-            border: none;
-            color: #888;
-            font-size: 11px;
-            float: right;
-            cursor: pointer;
-        }
-
-        .btn-action {
-            background: #27ae60;
-            color: #fff;
-            width: 100%;
-            padding: 6px;
-            margin-top: 5px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-
-        .btn-view-chart {
-            background: #2980b9;
-            color: #fff;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 8px;
-            width: 100%;
-        }
-
-        .full-chart-box {
-            display: none;
-            margin-top: 10px;
-            padding: 10px;
-            background: #fcf3cf;
-            border: 1px solid #f1c40f;
-            border-radius: 5px;
-            font-size: 12px;
-        }
-
-        @media print {
-            .search-card, .toggle-admin-btn, .admin-only, .btn-view-chart { display: none !important; }
-            body { background: white; padding: 0; }
-            .container { box-shadow: none; border: none; width: 100%; max-width: 100%; }
         }
     </style>
 </head>
@@ -207,57 +55,63 @@
     </h2>
 
     <div class="top-section">
-        <!-- Main Quick Turn Box -->
+        <!-- USER TURN CARD WITH DIRECT ADMIN INPUTS -->
         <div class="search-card">
             <h3>💧 पानी की अगली बारी की जानकारी</h3>
+            
             <div class="input-group">
                 <label for="userSelect">अपना नाम चुनें:</label>
                 <select id="userSelect" onchange="findMyTurn()">
                     <option value="">-- नाम चुनें --</option>
                 </select>
             </div>
+
+            <!-- यह एडमिन बॉक्स केवल Admin Active होने पर ही दिखेगा -->
+            <div class="admin-date-controls admin-only" id="directAdminDateBox">
+                <b style="color:#1e8449; font-size:12px;">⚙️ वर्तमान तारीख व दिन का अंतर (गैप) बदलें:</b>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px; gap:8px;">
+                    <div>
+                        <span style="font-size:11px; font-weight:bold; display:block;">वर्तमान तारीख चुनें:</span>
+                        <input type="date" id="startDateInput" style="width:130px; padding:4px; font-size:12px; border:1px solid #27ae60; border-radius:4px; font-weight:bold;" onchange="generate30DaysCalendar()">
+                    </div>
+                    <div>
+                        <span style="font-size:11px; font-weight:bold; display:block;">दिन का गैप:</span>
+                        <input type="number" id="intervalInput" value="1" min="1" max="30" style="width:75px; padding:4px; text-align:center; font-size:13px; font-weight:bold; color:#c0392b; border:1px solid #27ae60; border-radius:4px;" oninput="generate30DaysCalendar()">
+                    </div>
+                </div>
+            </div>
             
             <div id="turnResult" class="result-box">
                 👉 कृपया अपना नाम चुनकर वर्तमान और अगली बारी देखें।
             </div>
 
-            <!-- Full Monthly Schedule Toggle Button -->
             <button class="btn-view-chart" onclick="toggleFullChart()">📅 पूरे महीने की सिंचाई तारीखें (Full Chart)</button>
 
             <div id="fullChartBox" class="full-chart-box">
-                <b>🗓️ तय की गई आगामी पानी की तारीखें:</b>
-                <ul id="datesList" style="margin: 5px 0; padding-left: 20px;">
-                    <!-- Dates populated via JS -->
-                </ul>
+                <b>🗓️ पूरे महीने का ऑटो-जनरेट शेड्यूल:</b>
+                <ol id="datesList" style="margin: 5px 0; padding-left: 20px;">
+                    <!-- Dynamic Dates List -->
+                </ol>
             </div>
         </div>
 
+        <!-- SUMMARY CARD -->
         <div class="summary-card">
             <h3>सारांश (Summary)</h3>
             <table class="summary-table">
-                <tr>
-                    <td>कुल बीघा:</td>
-                    <td class="val" id="sumBigha">45</td>
-                </tr>
-                <tr>
-                    <td>कुल बांटे घंटे मिनट:</td>
-                    <td class="val" id="displayDistributedHM">11 घंटे 00 मिनट</td>
-                </tr>
-                <tr>
-                    <td>कुल पानी वितरण समय:</td>
-                    <td class="val" id="displayTotalDistributionHM">11 घंटे 40 मिनट</td>
-                </tr>
-                <tr>
-                    <td>आखरी बचा समय (घंटे/मिनट):</td>
-                    <td class="val" id="displayRemainingHours">0 घंटे 20 मिनट</td>
-                </tr>
+                <tr><td>कुल बीघा:</td><td class="val" id="sumBigha">45</td></tr>
+                <tr><td>कुल बांटे घंटे मिनट:</td><td class="val" id="displayDistributedHM">11 घंटे 00 मिनट</td></tr>
+                <tr><td>कुल पानी वितरण समय:</td><td class="val" id="displayTotalDistributionHM">11 घंटे 40 मिनट</td></tr>
+                <tr><td>आखरी बचा समय (घंटे/मिनट):</td><td class="val" id="displayRemainingHours">0 घंटे 20 मिनट</td></tr>
             </table>
         </div>
 
+        <!-- ADMIN CONTROLS -->
         <div class="controls-card admin-only" id="adminControls">
             <h3>एडमिन सेटिंग्स (Admin Only)</h3>
+            
             <div class="input-group">
-                <label for="totalPoolHours">कुल उपलब्ध पानी घंटे (Pool):</label>
+                <label for="totalPoolHours">कुल उपलब्ध पानी घंटे:</label>
                 <input type="number" id="totalPoolHours" value="12" step="0.1" oninput="calculateAll()">
             </div>
             <div class="input-group">
@@ -265,18 +119,15 @@
                 <input type="number" id="hoursToDistribute" value="11" step="0.1" oninput="calculateAll()">
             </div>
             <div class="input-group">
-                <label for="startTime">शुरुआती समय (Start Time):</label>
+                <label for="startTime">शुरुआती समय (Start):</label>
                 <input type="text" id="startTime" value="07:00:00 AM" onchange="calculateAll()">
-            </div>
-            <div class="input-group">
-                <label for="monthDatesInput">महीने की तारीखें (Comma से अलग करें):</label>
-                <input type="text" id="monthDatesInput" value="26 July 2026, 28 July 2026, 01 Aug 2026, 04 Aug 2026, 08 Aug 2026" onchange="updateMonthDates()">
             </div>
             <button class="btn-action" onclick="addRow()">+ नया नाम जोड़ें</button>
             <button class="btn-action" style="background:#8e44ad;" onclick="changeAdminPassword()">🔑 पासवर्ड बदलें</button>
         </div>
     </div>
 
+    <!-- MAIN DATA TABLE -->
     <div class="table-responsive">
         <table class="main-table" id="scheduleTable">
             <thead>
@@ -294,9 +145,7 @@
                     <th class="admin-only">कार्रवाई</th>
                 </tr>
             </thead>
-            <tbody id="tableBody">
-                <!-- Dynamic Content -->
-            </tbody>
+            <tbody id="tableBody"></tbody>
             <tfoot>
                 <tr style="background:#f2f2f2; font-weight:bold;">
                     <td colspan="2">कुल</td>
@@ -308,24 +157,13 @@
             </tfoot>
         </table>
     </div>
-
-    <div style="text-align:center; font-size:12px; color:#666;">
-        📱 मोबाइल पर पूरी टेबल देखने के लिए तालिका को बाएं-दाएं खिसकाएं।
-    </div>
 </div>
 
 <script>
     let isAdmin = false;
     let adminPassword = localStorage.getItem('irrigation_admin_pass') || "1234";
 
-    // Master Water Schedule Dates set by Admin
-    let waterDates = [
-        "26 July 2026",
-        "28 July 2026",
-        "01 Aug 2026",
-        "04 Aug 2026",
-        "08 Aug 2026"
-    ];
+    let waterDates = [];
 
     let initialData = [
         { name: "श्री जितेन्द्र सिंह नेगी", bigha: 7, extra: 40, amount: "", date: "" },
@@ -349,13 +187,19 @@
     ];
 
     function toggleEditMode() {
-        let pass = prompt("एडमिन पासवर्ड दर्ज करें:");
-        if(pass === adminPassword) {
-            isAdmin = !isAdmin;
-            alert(isAdmin ? "एडमिन मोड चालू!" : "व्यू मोड (Read-Only) चालू।");
+        if(!isAdmin) {
+            let pass = prompt("एडमिन पासवर्ड दर्ज करें:");
+            if(pass === adminPassword) {
+                isAdmin = true;
+                alert("एडमिन मोड चालू! अब आप तारीख और दिन का गैप बदल सकते हैं।");
+                renderTable();
+            } else if(pass !== null) {
+                alert("गलत पासवर्ड!");
+            }
+        } else {
+            isAdmin = false;
+            alert("व्यू मोड चालू।");
             renderTable();
-        } else if(pass !== null) {
-            alert("गलत पासवर्ड!");
         }
     }
 
@@ -366,16 +210,31 @@
             if(newPass && newPass.trim() !== "") {
                 adminPassword = newPass.trim();
                 localStorage.setItem('irrigation_admin_pass', adminPassword);
-                alert("पासवर्ड बदल दिया गया है!");
+                alert("पासवर्ड बदल दिया गया!");
             }
         } else if(oldPass !== null) {
             alert("पुराना पासवर्ड गलत है!");
         }
     }
 
-    function updateMonthDates() {
-        let rawVal = document.getElementById('monthDatesInput').value;
-        waterDates = rawVal.split(',').map(s => s.trim()).filter(s => s !== "");
+    function generate30DaysCalendar() {
+        let startVal = document.getElementById('startDateInput').value;
+        let gapDays = parseInt(document.getElementById('intervalInput').value);
+
+        if(isNaN(gapDays) || gapDays < 1) gapDays = 1;
+
+        if(!startVal) return;
+
+        waterDates = [];
+        let startDateObj = new Date(startVal);
+        
+        let tempDate = new Date(startDateObj);
+        for(let i = 0; i < 15; i++) {
+            let dateStr = tempDate.toLocaleDateString('hi-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+            waterDates.push(dateStr);
+            tempDate.setDate(tempDate.getDate() + gapDays);
+        }
+
         renderDatesList();
         findMyTurn();
     }
@@ -397,6 +256,7 @@
 
     function populateDropdown() {
         const select = document.getElementById('userSelect');
+        let currentVal = select.value;
         select.innerHTML = '<option value="">-- नाम चुनें --</option>';
         initialData.forEach((row, idx) => {
             let opt = document.createElement('option');
@@ -404,16 +264,22 @@
             opt.innerText = row.name;
             select.appendChild(opt);
         });
+        select.value = currentVal;
     }
 
     function renderTable() {
         const tbody = document.getElementById('tableBody');
         tbody.innerHTML = '';
 
+        // Show/Hide Admin elements
         document.querySelectorAll('.admin-only').forEach(el => {
-            el.style.display = isAdmin ? 'table-cell' : 'none';
+            if(el.tagName === 'TH' || el.tagName === 'TD') {
+                el.style.display = isAdmin ? 'table-cell' : 'none';
+            } else {
+                el.style.display = isAdmin ? 'block' : 'none';
+            }
         });
-        document.getElementById('adminControls').style.display = isAdmin ? 'block' : 'none';
+
         document.getElementById('editToggleBtn').innerText = isAdmin ? "🔓 Admin Active" : "🔐 Admin Edit";
 
         initialData.forEach((row, index) => {
@@ -505,11 +371,7 @@
         let roundedMin = Math.round(totalMinutes);
         let hrs = Math.floor(roundedMin / 60);
         let mins = roundedMin % 60;
-        if(hrs > 0) {
-            return `${hrs} घंटे ${mins} मिनट`;
-        } else {
-            return `${mins} मिनट`;
-        }
+        return hrs > 0 ? `${hrs} घंटे ${mins} मिनट` : `${mins} मिनट`;
     }
 
     function calculateAll() {
@@ -603,7 +465,10 @@
     }
 
     window.onload = function() {
-        renderDatesList();
+        let today = new Date().toISOString().split('T')[0];
+        document.getElementById('startDateInput').value = today;
+        
+        generate30DaysCalendar();
         renderTable();
     };
 </script>
