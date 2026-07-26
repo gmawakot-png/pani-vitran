@@ -28,12 +28,12 @@
         table.main-table th.red-txt, table.main-table td.red-txt { color: #c0392b; }
         tr.highlight-row { background-color: #d4efdf !important; font-weight: bold; }
         
-        /* FIX: Admin hidden elements class */
         .admin-only { display: none; }
         
         .toggle-admin-btn { background: transparent; border: none; color: #888; font-size: 11px; float: right; cursor: pointer; }
         .btn-action { background: #27ae60; color: #fff; width: 100%; padding: 6px; margin-top: 5px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
-        .btn-view-chart { background: #2980b9; color: #fff; border: none; padding: 8px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; margin-top: 8px; width: 100%; }
+        .btn-save-date { background: #2980b9; color: #fff; width: 100%; padding: 6px; margin-top: 8px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 12px; }
+        .btn-view-chart { background: #16a085; color: #fff; border: none; padding: 8px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; margin-top: 8px; width: 100%; }
         .full-chart-box { display: none; margin-top: 10px; padding: 10px; background: #fcf3cf; border: 1px solid #f1c40f; border-radius: 5px; font-size: 12px; max-height: 250px; overflow-y: auto; }
         
         .admin-date-controls {
@@ -79,6 +79,8 @@
                         <input type="number" id="intervalInput" value="1" min="1" max="30" style="width:75px; padding:4px; text-align:center; font-size:13px; font-weight:bold; color:#c0392b; border:1px solid #27ae60; border-radius:4px;" oninput="generate30DaysCalendar()">
                     </div>
                 </div>
+                <!-- SAVE BUTTON -->
+                <button class="btn-save-date" onclick="saveDateSettings()">💾 तारीख व गैप हमेशा के लिए सेव करें</button>
             </div>
             
             <div id="turnResult" class="result-box">
@@ -191,7 +193,7 @@
             let pass = prompt("एडमिन पासवर्ड दर्ज करें:");
             if(pass === adminPassword) {
                 isAdmin = true;
-                alert("एडमिन मोड चालू! अब आप तारीख और दिन का गैप बदल सकते हैं।");
+                alert("एडमिन मोड चालू! अब आप तारीख, दिन का गैप और डेटा बदलकर सेव कर सकते हैं।");
                 renderTable();
             } else if(pass !== null) {
                 alert("गलत पासवर्ड!");
@@ -215,6 +217,22 @@
         } else if(oldPass !== null) {
             alert("पुराना पासवर्ड गलत है!");
         }
+    }
+
+    // SAVING DATE & GAP PERMANENTLY
+    function saveDateSettings() {
+        let dateVal = document.getElementById('startDateInput').value;
+        let gapVal = document.getElementById('intervalInput').value;
+
+        if(!dateVal) {
+            alert("कृपया सही तारीख चुनें!");
+            return;
+        }
+
+        localStorage.setItem('saved_start_date', dateVal);
+        localStorage.setItem('saved_gap_days', gapVal);
+
+        alert("✅ तारीख और दिन का अंतर सफलतापूर्वक सेव हो गया है!");
     }
 
     function generate30DaysCalendar() {
@@ -271,7 +289,6 @@
         const tbody = document.getElementById('tableBody');
         tbody.innerHTML = '';
 
-        // Show/Hide Admin elements
         document.querySelectorAll('.admin-only').forEach(el => {
             if(el.tagName === 'TH' || el.tagName === 'TD') {
                 el.style.display = isAdmin ? 'table-cell' : 'none';
@@ -464,10 +481,22 @@
         `;
     }
 
+    // ON LOAD: RETRIEVE SAVED VALUES
     window.onload = function() {
-        let today = new Date().toISOString().split('T')[0];
-        document.getElementById('startDateInput').value = today;
-        
+        let savedDate = localStorage.getItem('saved_start_date');
+        let savedGap = localStorage.getItem('saved_gap_days');
+
+        if(savedDate) {
+            document.getElementById('startDateInput').value = savedDate;
+        } else {
+            let today = new Date().toISOString().split('T')[0];
+            document.getElementById('startDateInput').value = today;
+        }
+
+        if(savedGap) {
+            document.getElementById('intervalInput').value = savedGap;
+        }
+
         generate30DaysCalendar();
         renderTable();
     };
