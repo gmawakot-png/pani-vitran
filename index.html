@@ -201,7 +201,8 @@
                     <td id="totalBighaFoot">45</td>
                     <td id="totalMinFoot">657</td>
                     <td id="totalHMFoot">10 घंटे 57 मिनट</td>
-                    <td colspan="6"></td>
+                    <td id="totalExtraFoot" class="red-txt">-</td>
+                    <td colspan="5"></td>
                 </tr>
             </tfoot>
         </table>
@@ -581,8 +582,15 @@
         let startStr = document.getElementById('startTime').value;
 
         let totalBigha = initialData.reduce((sum, r) => sum + (parseFloat(r.bigha) || 0), 0);
+        let totalExtra = initialData.reduce((sum, r) => sum + (parseFloat(r.extra) || 0), 0);
+
         document.getElementById('sumBigha').innerText = totalBigha;
         document.getElementById('totalBighaFoot').innerText = totalBigha;
+
+        let extraFootEl = document.getElementById('totalExtraFoot');
+        if (extraFootEl) {
+            extraFootEl.innerText = totalExtra > 0 ? totalExtra + " मिनट" : "-";
+        }
 
         let totalDistMinutes = hoursToDist * 60;
         document.getElementById('displayDistributedHM').innerText = formatHM(totalDistMinutes);
@@ -636,10 +644,7 @@
         // =========================================================
         // 🔥 आखरी बचा समय का सटीक समय अंतर फ़ॉर्मूला (Time Diff Formula)
         // =========================================================
-        // कुल उपलब्ध समय (मिलीसेकंड में) = कुल उपलब्ध घंटे * 60 मिनट * 60 सेकंड * 1000
         let totalPoolMs = totalPool * 60 * 60 * 1000;
-
-        // बचा हुआ समय (मिलीसेकंड में) = कुल उपलब्ध समय - टेबल द्वारा इस्तेमाल किया गया कुल समय
         let remainingMs = totalPoolMs - totalUsedMs;
 
         if (remainingMs <= 0) {
