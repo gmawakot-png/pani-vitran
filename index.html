@@ -6,7 +6,7 @@
     <title>सिंचाई समय सारणी (Irrigation Schedule)</title>
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
-        body { background-color: #f4f7f6; margin: 0; padding: 10px; color: #333; padding-bottom: 60px; }
+        body { background-color: #f4f7f6; margin: 0; padding: 10px; color: #333; padding-bottom: 80px; }
         .container { max-width: 1200px; margin: 0 auto; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         
         .header-bar {
@@ -53,7 +53,42 @@
         tr.highlight-row { background-color: #d4efdf !important; font-weight: bold; }
         
         .admin-only { display: none; }
-        .toggle-admin-btn { background: #34495e; color: #fff; border: none; font-size: 12px; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        
+        /* Floating Admin Button (दाएँ तरफ सबसे नीचे) */
+        .toggle-admin-btn { 
+            position: fixed; 
+            bottom: 20px; 
+            right: 20px; 
+            background: #34495e; 
+            color: #fff; 
+            border: none; 
+            font-size: 13px; 
+            padding: 10px 18px; 
+            border-radius: 30px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            z-index: 1000;
+        }
+
+        /* Floating Save Button (Admin Button के ठीक ऊपर) */
+        .floating-save-btn {
+            position: fixed; 
+            bottom: 70px; 
+            right: 20px; 
+            background: #2980b9; 
+            color: #fff; 
+            padding: 10px 18px; 
+            border-radius: 30px; 
+            border: none; 
+            font-size: 13px; 
+            font-weight: bold; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            cursor: pointer; 
+            z-index: 1000; 
+            display: none;
+        }
+
         .btn-action { background: #27ae60; color: #fff; width: 100%; padding: 6px; margin-top: 5px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .btn-view-chart { background: #16a085; color: #fff; border: none; padding: 8px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; margin-top: 8px; width: 100%; }
         .full-chart-box { display: none; margin-top: 10px; padding: 10px; background: #fcf3cf; border: 1px solid #f1c40f; border-radius: 5px; font-size: 12px; max-height: 250px; overflow-y: auto; }
@@ -79,12 +114,6 @@
             background: #d4efdf; padding: 8px 10px; border-radius: 6px; margin-top: 10px; margin-bottom: 5px; border: 2px solid #27ae60;
         }
 
-        .floating-save-btn {
-            position: fixed; bottom: 20px; right: 20px; background: #2980b9; color: #fff; padding: 12px 20px;
-            border-radius: 30px; border: none; font-size: 14px; font-weight: bold; box-shadow: 0 4px 10px rgba(0,0,0,0.3);
-            cursor: pointer; z-index: 1000; display: none;
-        }
-
         .clean-input {
             border: 1px solid #bdc3c7;
             padding: 4px 6px;
@@ -103,7 +132,6 @@
     <div class="header-bar">
         <h2>पानी सिंचाई वितरण सारणी</h2>
         <div style="display: flex; align-items: center; gap: 10px;">
-            <button class="toggle-admin-btn" onclick="openAdminModal()" id="editToggleBtn">🔐 Admin Edit</button>
             <div class="live-clock-box">
                 🌐 <span id="liveClock">00:00:00 AM</span>
             </div>
@@ -209,7 +237,9 @@
     </div>
 </div>
 
+<!-- दाएँ तरफ Floating Buttons -->
 <button class="floating-save-btn" id="floatingSaveBtn" onclick="saveDataToCloud()">💾 सभी बदलाव क्लाउड पर सेव करें</button>
+<button class="toggle-admin-btn" onclick="openAdminModal()" id="editToggleBtn">🔐 Admin Edit</button>
 
 <div class="modal-overlay" id="adminModal">
     <div class="modal-card">
@@ -634,16 +664,12 @@
         document.getElementById('totalMinFoot').innerText = roundedTableMinutesSum;
         document.getElementById('totalHMFoot').innerText = formatHM(roundedTableMinutesSum);
 
-        // कुल पानी वितरण समय (शुरुआत से लेकर आखिरी समाप्ति तक का अंतर)
         let totalUsedMs = currentStartTime.getTime() - firstStartTime.getTime();
         let totalDistributionMinutes = Math.round(totalUsedMs / (1000 * 60));
         let distHrs = Math.floor(totalDistributionMinutes / 60);
         let distMins = totalDistributionMinutes % 60;
         document.getElementById('displayTotalDistributionHM').innerText = `${distHrs} घंटे ${distMins < 10 ? '0' + distMins : distMins} मिनट`;
 
-        // =========================================================
-        // 🔥 आखरी बचा समय का सटीक समय अंतर फ़ॉर्मूला (Time Diff Formula)
-        // =========================================================
         let totalPoolMs = totalPool * 60 * 60 * 1000;
         let remainingMs = totalPoolMs - totalUsedMs;
 
