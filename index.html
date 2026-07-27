@@ -36,7 +36,6 @@
         .top-section { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 15px; }
         .controls-card, .summary-card, .search-card, .notice-card, .mode-card { background: #eef5f9; border: 1px solid #b8daff; border-radius: 6px; padding: 12px; flex: 1; min-width: 260px; }
         
-        /* एडमिन मोड सिलेक्शन स्टाइल */
         .mode-card { background: #fef3c7; border-color: #f59e0b; margin-bottom: 12px; }
         .mode-card h3 { color: #92400e; border-bottom: 1px solid #f59e0b; margin-top: 0; font-size: 15px; padding-bottom: 5px; }
         .mode-options { display: flex; gap: 15px; margin-top: 8px; flex-wrap: wrap; }
@@ -56,6 +55,8 @@
         .notice-textarea { width: 100%; height: 80px; padding: 6px; font-size: 12px; border: 1px solid #f39c12; border-radius: 4px; resize: vertical; }
 
         .result-box { margin-top: 10px; padding: 12px; background: #ffffff; border: 2px solid #27ae60; border-radius: 6px; font-size: 13px; line-height: 1.6; }
+        .due-msg { margin-top: 8px; padding-top: 6px; border-top: 1px dashed #e74c3c; color: #c0392b; font-weight: bold; }
+
         .summary-table { width: 100%; border-collapse: collapse; }
         .summary-table td { padding: 5px 6px; font-size: 13px; border-bottom: 1px dashed #cbd5e1; }
         .summary-table td.val { text-align: right; font-weight: bold; color: #c0392b; }
@@ -267,7 +268,6 @@
         <div class="controls-card admin-only-block" id="adminControls">
             <h3>एडमिन सेटिंग्स (Admin Only)</h3>
 
-            <!-- पानी बाँटने का तरीका अब एडमिन पैनल के अंदर है -->
             <div class="mode-card">
                 <h3>🚰 पानी बाँटने का तरीका चुनें:</h3>
                 <div class="mode-options">
@@ -304,7 +304,6 @@
         </div>
     </div>
 
-    <!-- पूरा टेबल वाला सेक्शन -->
     <div class="table-responsive" id="tableWrapper">
         <table class="main-table" id="scheduleTable">
             <thead>
@@ -380,7 +379,7 @@
     let adminPassword = "2050"; 
     let noticeMessage = "";
     let isTablePublic = false; 
-    let selectedMode = "straight"; // 'straight' या 'oddeven'
+    let selectedMode = "straight"; 
     let waterDates = [];
     let debounceTimer;
 
@@ -844,12 +843,18 @@
             targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
+        let dueTextHtml = "";
+        if (!item.amount || parseFloat(item.amount) === 0) {
+            dueTextHtml = `<div class="due-msg">⚠️ आपका 100rs due (बाकी) है (जिसका भुगतान अभी तक प्राप्त नहीं हुआ है)।</div>`;
+        }
+
         if (selectedMode === "straight") {
             resultDiv.innerHTML = `
                 💧 <b>${item.name} जी की बारी (लगातार):</b><br>
                 • <b>पानी की तारीखें:</b> <span style="color:#27ae60; font-weight:bold;">${waterDates.join(', ') || 'तारीख तय नहीं'}</span><br>
                 • <b>पानी का समय:</b> ${item.computedFrom} से ${item.computedTo}<br>
                 • <b>कुल समय अवधि:</b> ${item.computedDuration}
+                ${dueTextHtml}
             `;
         } else {
             let hoursToDist = parseFloat(document.getElementById('hoursToDistribute').value) || 0;
@@ -893,6 +898,7 @@
                 <b>2. उल्टी/रिवर्स बारी:</b><br>
                 • तारीखें: <span style="color:#d35400; font-weight:bold;">${reverseDates.join(', ') || 'तारीख तय नहीं'}</span><br>
                 • समय: <span style="color:#c0392b; font-weight:bold;">${reverseFrom} से ${reverseTo}</span> (${item.computedDuration})
+                ${dueTextHtml}
             `;
         }
         
@@ -903,6 +909,11 @@
         let straightFrom = item.computedFrom || '-';
         let straightTo = item.computedTo || '-';
         let duration = item.computedDuration || '-';
+        
+        let dueSlipHtml = "";
+        if (!item.amount || parseFloat(item.amount) === 0) {
+            dueSlipHtml = `<br><span style="color:#c0392b; font-weight:bold;">बकाया: ₹100 रुपये (भुगतान बाकी है)</span>`;
+        }
 
         if (!isOddEven) {
             return `
@@ -913,6 +924,7 @@
                         <b>बारी तारीखें:</b> ${waterDates.join(', ') || 'तारीख तय नहीं'}<br>
                         <b>समय:</b> ${straightFrom} से ${straightTo}<br>
                         <b>अवधि:</b> ${duration}
+                        ${dueSlipHtml}
                     </div>
                     <div class="slip-footer">सिंचाई प्रबंधन समिति</div>
                 </div>
@@ -970,6 +982,7 @@
                     <b>बारी तारीख:</b> ${reverseDates.join(', ') || 'तारीख तय नहीं'}<br>
                     <b>समय:</b> <span style="color:#c0392b; font-weight:bold;">${reverseFrom} से ${reverseTo}</span><br>
                     <b>अवधि:</b> ${duration}
+                    ${dueSlipHtml}
                 </div>
 
                 <div class="slip-footer">सिंचाई प्रबंधन समिति</div>
