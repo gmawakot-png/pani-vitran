@@ -374,6 +374,7 @@
 <script>
     const BIN_ID = "6a65ab61da38895dfe90bed8"; 
     const MASTER_KEY = "$2a$10$JcvEWN7NJzepZ2xuDKG9g.Gjn/jzPPDh0sUxMcf2OyILulzPFrWoi"; 
+    const ACCESS_KEY = "$2a$10$ag8oztyaiCZ0sbItUNyZC.ZttjN7p1zmuJMDkX3tT9C/5dGSsLT2G"; 
 
     let isAdmin = false;
     let adminPassword = "2050"; 
@@ -503,16 +504,17 @@
 
     async function loadDataFromCloud() {
         try {
-            let res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, {
+            let cacheBuster = new Date().getTime();
+            let res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest?cb=${cacheBuster}`, {
+                method: 'GET',
                 headers: { 
                     "X-Master-Key": MASTER_KEY,
+                    "X-Access-Key": ACCESS_KEY,
                     "X-Bin-Meta": "false"
                 }
             });
             if (!res.ok) throw new Error("डेटा लोड करने में विफल");
-            let data = await res.json();
-            
-            let record = data.record || data;
+            let record = await res.json();
             
             if(record) {
                 if(record.users) initialData = record.users;
@@ -564,7 +566,7 @@
                 headers: {
                     'Content-Type': 'application/json',
                     'X-Master-Key': MASTER_KEY,
-                    'X-Access-Key': MASTER_KEY
+                    'X-Access-Key': ACCESS_KEY
                 },
                 body: JSON.stringify(payload)
             });
@@ -573,12 +575,11 @@
                 alert("✅ डेटा ऑनलाइन क्लाउड पर सफलता से सेव हो गया!");
             } else {
                 let errJson = await res.json().catch(() => ({}));
-                console.error("Save Error Details:", errJson);
-                alert("❌ डेटा सेव करने में समस्या आई! (कारण: " + (errJson.message || "JSONBin Permissions issue") + ")");
+                alert("❌ डेटा सेव करने में समस्या आई: " + (errJson.message || "Permissions issue"));
             }
         } catch(e) {
             console.error("Save Error:", e);
-            alert("❌ नेटवर्क की समस्या है या कोड कनेक्ट नहीं हो पा रहा!");
+            alert("❌ नेटवर्क की समस्या है!");
         } finally {
             saveBtnMain.innerText = "☁️ ऑनलाइन क्लाउड पर सेव करें";
             floatBtn.innerText = "💾 सभी बदलाव क्लाउड पर सेव करें";
