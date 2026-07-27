@@ -61,7 +61,6 @@
         
         .admin-only-block { display: none; }
         
-        /* Floating Admin Button */
         .toggle-admin-btn { 
             position: fixed; 
             bottom: 20px; 
@@ -78,7 +77,6 @@
             z-index: 1000;
         }
 
-        /* Floating Save Button */
         .floating-save-btn {
             position: fixed; 
             bottom: 70px; 
@@ -98,6 +96,10 @@
 
         .btn-action { background: #27ae60; color: #fff; width: 100%; padding: 8px; margin-top: 5px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .btn-view-chart { background: #16a085; color: #fff; border: none; padding: 8px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; margin-top: 8px; width: 100%; }
+        .btn-print-slip { background: #e67e22; color: #fff; border: none; padding: 8px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; margin-top: 5px; width: 100%; display: none; }
+        .btn-print-all { background: #8e44ad; color: #fff; border: none; padding: 8px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; margin-top: 8px; width: 100%; }
+        .btn-row-print { background: #e67e22; color: white; border: none; padding: 4px 8px; font-size: 11px; border-radius: 3px; cursor: pointer; font-weight: bold; }
+
         .full-chart-box { display: none; margin-top: 10px; padding: 10px; background: #fcf3cf; border: 1px solid #f1c40f; border-radius: 5px; font-size: 12px; max-height: 250px; overflow-y: auto; }
         
         .btn-move { background: #3498db; color: white; border: none; padding: 4px 8px; font-size: 12px; border-radius: 3px; cursor: pointer; margin: 0 1px; font-weight: bold; }
@@ -128,8 +130,49 @@
             font-size: 12px;
             outline: none;
         }
-        .clean-input:focus {
-            border-color: #2980b9;
+        .clean-input:focus { border-color: #2980b9; }
+
+        #printableArea { display: none; }
+
+        .slip-box {
+            width: 100%;
+            padding: 8px;
+            border: 1px dashed #444;
+            font-family: Arial, sans-serif;
+            background: #fff;
+            box-sizing: border-box;
+            border-radius: 4px;
+        }
+        .slip-title {
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+            border-bottom: 1px solid #000;
+            padding-bottom: 2px;
+            margin-bottom: 4px;
+        }
+        .slip-item { font-size: 10.5px; margin-bottom: 2px; line-height: 1.35; }
+        .slip-footer { margin-top: 4px; text-align: center; font-size: 8.5px; border-top: 1px solid #ccc; padding-top: 2px; color: #555; }
+
+        @media print {
+            @page {
+                size: A4 portrait;
+                margin: 10mm;
+            }
+            body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
+            .container, .toggle-admin-btn, .floating-save-btn, .modal-overlay { display: none !important; }
+            #printableArea {
+                display: grid !important;
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 12px !important;
+                width: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            .slip-box { 
+                page-break-inside: avoid !important; 
+                break-inside: avoid !important; 
+            }
         }
     </style>
 </head>
@@ -148,7 +191,7 @@
     <div class="top-section">
         <div class="search-card">
             <h3>💧 पानी की अगली बारी की जानकारी</h3>
-            
+
             <div class="input-group">
                 <label for="userSelect">अपना नाम चुनें:</label>
                 <select id="userSelect" onchange="findMyTurn()">
@@ -171,9 +214,10 @@
             </div>
             
             <div id="turnResult" class="result-box">
-                👉 कृपया अपना नाम चुनकर वर्तमान और अगली बारी देखें।
+                कृपया नाम चुनें: बॉक्स में क्लिक करें 👆
             </div>
 
+            <button class="btn-print-slip" id="printSlipBtn" onclick="printSelectedSlip()">🖨️ इस सदस्य की पर्ची प्रिंट करें</button>
             <button class="btn-view-chart" onclick="toggleFullChart()">📅 पूरे महीने की सिंचाई तारीखें (Full Chart)</button>
 
             <div id="fullChartBox" class="full-chart-box">
@@ -182,7 +226,6 @@
             </div>
         </div>
 
-        <!-- सूचना/विवरण का नया बॉक्स -->
         <div class="notice-card">
             <h3>📢 सूचना एवं विवरण</h3>
             <div id="noticeDisplay" class="notice-content">कोई विशेष सूचना उपलब्ध नहीं है।</div>
@@ -195,11 +238,13 @@
         <div class="summary-card">
             <h3>सारांश (Summary)</h3>
             <table class="summary-table">
-                <tr><td>कुल बीघा:</td><td class="val" id="sumBigha">45</td></tr>
+                <tr id="sumBighaRow"><td>कुल बीघा:</td><td class="val" id="sumBigha">45</td></tr>
                 <tr><td>बांटा गया कुल समय (घंटे/मिनट):</td><td class="val" id="displayDistributedHM">11 घंटे 00 मिनट</td></tr>
                 <tr><td>कुल पानी वितरण समय (घंटे/मिनट):</td><td class="val" id="displayTotalDistributionHM">11 घंटे 40 मिनट</td></tr>
                 <tr><td>आखरी बचा समय (घंटे/मिनट):</td><td class="val" id="displayRemainingHours">0 मिनट</td></tr>
             </table>
+            <button class="btn-print-all" onclick="printAllSlips(false)">🖨️ 1 महीने की पर्ची (लगातार)</button>
+            <button class="btn-print-all" style="background: #27ae60;" onclick="printAllSlips(true)">🖨️ 1 महीने की पर्ची (औड इवन)</button>
         </div>
 
         <div class="controls-card admin-only-block" id="adminControls">
@@ -217,6 +262,16 @@
                 <input type="text" id="startTime" value="07:00:00 AM" onchange="calculateAll()">
             </div>
             
+            <div class="input-group">
+                <label for="sequenceOption">➕ बारी क्रम बदलें:</label>
+                <select id="sequenceOption" onchange="changeSequenceOption(this.value)">
+                    <option value="1">Option 1 (लगातार समान क्रम)</option>
+                    <option value="2">Option 2 (नाम ऊपर-नीचे / उल्टी बारी)</option>
+                </select>
+            </div>
+
+            <button class="btn-action" id="togglePublicInfoBtn" style="background:#3498db; margin-bottom:5px;" onclick="togglePublicInfo()">👁️ नाम/बीघा पब्लिक रखें: चालू</button>
+            <button class="btn-action" style="background:#e67e22; margin-bottom:5px;" onclick="reverseArrayData()">🔄 पूरी सारणी का क्रम उल्टा करें (उल्टा/सीधा क्रम)</button>
             <button class="btn-action" style="background:#27ae60;" id="saveBtnMain" onclick="saveDataToCloud()">☁️ ऑनलाइन क्लाउड पर सेव करें</button>
             <button class="btn-action" style="background:#8e44ad;" onclick="openChangePassModal()">🔑 पासवर्ड बदलें</button>
         </div>
@@ -226,9 +281,9 @@
         <table class="main-table" id="scheduleTable">
             <thead>
                 <tr>
-                    <th style="width: 45px;">S.No</th>
-                    <th>नाम</th>
-                    <th>बीघा</th>
+                    <th style="width: 45px;" class="info-col">S.No</th>
+                    <th class="info-col">नाम</th>
+                    <th class="info-col">बीघा</th>
                     <th class="red-txt">मिनट</th>
                     <th class="red-txt">घंटे /मिनट</th>
                     <th class="red-txt">अतिरिक्त समय</th>
@@ -236,27 +291,28 @@
                     <th class="red-txt">तक (समाप्ति)</th>
                     <th>धनराशी</th>
                     <th>रू० प्राप्त तारीख</th>
+                    <th>पर्ची</th>
                     <th id="actionHeader" style="display:none; min-width: 220px;">कार्रवाई</th>
                 </tr>
             </thead>
             <tbody id="tableBody"></tbody>
             <tfoot>
                 <tr style="background:#f2f2f2; font-weight:bold;">
-                    <td colspan="2">कुल</td>
-                    <td id="totalBighaFoot">45</td>
+                    <td colspan="3" class="info-col">कुल बीघा: <span id="totalBighaFoot">45</span></td>
                     <td id="totalMinFoot">657</td>
                     <td id="totalHMFoot">10 घंटे 57 मिनट</td>
                     <td id="totalExtraFoot" class="red-txt">-</td>
                     <td colspan="2"></td>
                     <td id="totalAmountFoot" style="color:#27ae60; font-size:13px;">0</td>
-                    <td colspan="2"></td>
+                    <td colspan="3"></td>
                 </tr>
             </tfoot>
         </table>
     </div>
 </div>
 
-<!-- Floating Buttons -->
+<div id="printableArea"></div>
+
 <button class="floating-save-btn" id="floatingSaveBtn" onclick="saveDataToCloud()">💾 सभी बदलाव क्लाउड पर सेव करें</button>
 <button class="toggle-admin-btn" onclick="openAdminModal()" id="editToggleBtn">🔐 Admin Edit</button>
 
@@ -295,8 +351,10 @@
     let isAdmin = false;
     let adminPassword = "2050"; 
     let noticeMessage = "";
+    let isNameBighaPublic = true;
     let waterDates = [];
     let debounceTimer;
+    let selectedSequenceOption = "1";
 
     let initialData = [
         { name: "श्री जितेन्द्र सिंह नेगी", bigha: 7, extra: 40, amount: "", date: "" },
@@ -338,11 +396,30 @@
         document.getElementById('noticeDisplay').innerText = val.trim() !== "" ? val : "कोई विशेष सूचना उपलब्ध नहीं है।";
     }
 
+    function togglePublicInfo() {
+        isNameBighaPublic = !isNameBighaPublic;
+        renderTable();
+    }
+
+    function changeSequenceOption(val) {
+        selectedSequenceOption = val;
+        if(val === "2") {
+            reverseArrayData();
+        } else {
+            renderTable();
+        }
+    }
+
     function moveRow(index, direction) {
         const newIndex = index + direction;
         if (newIndex < 0 || newIndex >= initialData.length) return;
 
         [initialData[index], initialData[newIndex]] = [initialData[newIndex], initialData[index]];
+        renderTable();
+    }
+
+    function reverseArrayData() {
+        initialData.reverse();
         renderTable();
     }
 
@@ -418,6 +495,13 @@
                     document.getElementById('noticeInput').value = noticeMessage;
                     updateNoticeText(noticeMessage);
                 }
+                if(data.record.isNameBighaPublic !== undefined) {
+                    isNameBighaPublic = data.record.isNameBighaPublic;
+                }
+                if(data.record.sequenceOption) {
+                    selectedSequenceOption = data.record.sequenceOption;
+                    document.getElementById('sequenceOption').value = selectedSequenceOption;
+                }
                 if(data.record.startDate) document.getElementById('startDateInput').value = data.record.startDate;
                 if(data.record.gapDays) document.getElementById('intervalInput').value = data.record.gapDays;
                 generate30DaysCalendar();
@@ -441,6 +525,8 @@
             users: initialData,
             password: adminPassword,
             notice: noticeMessage,
+            isNameBighaPublic: isNameBighaPublic,
+            sequenceOption: selectedSequenceOption,
             startDate: document.getElementById('startDateInput').value,
             gapDays: document.getElementById('intervalInput').value
         };
@@ -479,7 +565,7 @@
         let startDateObj = new Date(startVal);
         let tempDate = new Date(startDateObj);
         for(let i = 0; i < 15; i++) {
-            let dateStr = tempDate.toLocaleDateString('hi-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+            let dateStr = tempDate.toLocaleDateString('hi-IN', { day: '2-digit', month: 'short' });
             waterDates.push(dateStr);
             tempDate.setDate(tempDate.getDate() + gapDays);
         }
@@ -519,13 +605,27 @@
         const tbody = document.getElementById('tableBody');
         tbody.innerHTML = '';
 
+        const showInfo = isAdmin || isNameBighaPublic;
+
         document.getElementById('actionHeader').style.display = isAdmin ? 'table-cell' : 'none';
         document.getElementById('floatingSaveBtn').style.display = isAdmin ? 'block' : 'none';
         document.getElementById('editToggleBtn').innerText = isAdmin ? "🔓 Admin Active" : "🔐 Admin Edit";
 
+        let toggleBtn = document.getElementById('togglePublicInfoBtn');
+        if(toggleBtn) {
+            toggleBtn.innerText = isNameBighaPublic ? "👁️ नाम/बीघा पब्लिक रखें: चालू" : "🙈 नाम/बीघा पब्लिक रखें: बंद";
+            toggleBtn.style.background = isNameBighaPublic ? "#3498db" : "#e74c3c";
+        }
+
         document.querySelectorAll('.admin-only-block').forEach(el => {
             el.style.display = isAdmin ? 'block' : 'none';
         });
+
+        document.querySelectorAll('.info-col').forEach(el => {
+            el.style.display = showInfo ? 'table-cell' : 'none';
+        });
+
+        document.getElementById('sumBighaRow').style.display = showInfo ? 'table-row' : 'none';
 
         initialData.forEach((row, index) => {
             const tr = document.createElement('tr');
@@ -533,11 +633,11 @@
 
             if(isAdmin) {
                 tr.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td style="text-align: left;">
+                    <td class="info-col">${index + 1}</td>
+                    <td class="info-col" style="text-align: left;">
                         <input type="text" class="clean-input" value="${row.name}" oninput="updateData(${index}, 'name', this.value)" style="width:100%;">
                     </td>
-                    <td>
+                    <td class="info-col">
                         <input type="number" class="clean-input" value="${row.bigha}" step="0.1" style="width:55px; text-align:center;" oninput="updateData(${index}, 'bigha', parseFloat(this.value)||0)">
                     </td>
                     <td class="col-min">0</td>
@@ -554,6 +654,9 @@
                         <input type="text" class="clean-input" value="${row.date || ''}" style="width:85px; text-align:center;" oninput="updateData(${index}, 'date', this.value)">
                     </td>
                     <td>
+                        <button class="btn-row-print" onclick="printSingleSlip(${index})">🖨️ प्रिंट</button>
+                    </td>
+                    <td>
                         <button class="btn-move" onclick="moveRow(${index}, -1)" ${index === 0 ? 'disabled' : ''}>⬆️</button>
                         <button class="btn-move" onclick="moveRow(${index}, 1)" ${index === initialData.length - 1 ? 'disabled' : ''}>⬇️</button>
                         <button class="btn-insert" onclick="insertRowAfter(${index})">➕ नीचे नाम जोड़ें</button>
@@ -562,9 +665,9 @@
                 `;
             } else {
                 tr.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td style="text-align: left; font-weight:bold;">${row.name}</td>
-                    <td>${row.bigha}</td>
+                    ${showInfo ? `<td class="info-col">${index + 1}</td>` : ''}
+                    ${showInfo ? `<td class="info-col" style="text-align: left; font-weight:bold;">${row.name}</td>` : ''}
+                    ${showInfo ? `<td class="info-col">${row.bigha}</td>` : ''}
                     <td class="col-min">0</td>
                     <td class="col-hm">0</td>
                     <td>${row.extra || '-'}</td>
@@ -572,6 +675,9 @@
                     <td class="col-to" style="font-weight:bold; color:#c0392b;">-</td>
                     <td>${row.amount ? row.amount + ' रु०' : '-'}</td>
                     <td>${row.date || '-'}</td>
+                    <td>
+                        <button class="btn-row-print" onclick="printSingleSlip(${index})">🖨️ प्रिंट</button>
+                    </td>
                 `;
             }
             tbody.appendChild(tr);
@@ -666,7 +772,6 @@
         let totalBigha = initialData.reduce((sum, r) => sum + (parseFloat(r.bigha) || 0), 0);
         let totalExtra = initialData.reduce((sum, r) => sum + (parseFloat(r.extra) || 0), 0);
         
-        // कुल धनराशि का योग
         let totalAmount = initialData.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
         document.getElementById('totalAmountFoot').innerText = totalAmount > 0 ? totalAmount + " रु०" : "0 रु०";
 
@@ -697,24 +802,24 @@
 
             let totalRowMinutes = min + extra;
 
+            let startFormatted = formatTimeStr(currentStartTime);
+            let totalDurationMs = totalRowMinutes * 60 * 1000;
+            let endTime = new Date(currentStartTime.getTime() + totalDurationMs);
+            let endFormatted = formatTimeStr(endTime);
+
+            row.computedFrom = startFormatted;
+            row.computedTo = endFormatted;
+            row.computedDuration = formatHM(totalRowMinutes);
+
             let rowTR = rows[i];
             if(rowTR) {
                 rowTR.querySelector('.col-min').innerText = roundedMin;
                 rowTR.querySelector('.col-hm').innerText = formatHM(totalRowMinutes);
-                let startFormatted = formatTimeStr(currentStartTime);
                 rowTR.querySelector('.col-from').innerText = startFormatted;
-
-                let totalDurationMs = totalRowMinutes * 60 * 1000;
-                let endTime = new Date(currentStartTime.getTime() + totalDurationMs);
-                let endFormatted = formatTimeStr(endTime);
                 rowTR.querySelector('.col-to').innerText = endFormatted;
-
-                row.computedFrom = startFormatted;
-                row.computedTo = endFormatted;
-                row.computedDuration = formatHM(totalRowMinutes);
-
-                currentStartTime = endTime;
             }
+
+            currentStartTime = endTime;
         });
 
         document.getElementById('totalMinFoot').innerText = roundedTableMinutesSum;
@@ -748,10 +853,13 @@
     function findMyTurn() {
         let idx = document.getElementById('userSelect').value;
         let resultDiv = document.getElementById('turnResult');
+        let printBtn = document.getElementById('printSlipBtn');
+
         document.querySelectorAll('#tableBody tr').forEach(r => r.classList.remove('highlight-row'));
 
         if(idx === "") {
-            resultDiv.innerHTML = "👉 कृपया अपना नाम चुनकर वर्तमान और अगली बारी देखें।";
+            resultDiv.innerHTML = "कृपया नाम चुनें: बॉक्स में क्लिक करें 👆";
+            printBtn.style.display = "none";
             return;
         }
 
@@ -764,13 +872,136 @@
 
         let currentTurnDate = waterDates[0] || "तारीख तय नहीं";
         let nextTurnDate = waterDates[1] || "इसके बाद की तारीख तय नहीं";
+        let lastTurnDate = waterDates[waterDates.length - 1] || "तारीख तय नहीं";
 
         resultDiv.innerHTML = `
-            💧 <b>${item.name} जी की अगली बारी:</b><br>
+            💧 <b>${item.name} जी की बारी:</b><br>
             • <b>वर्तमान बारी तारीख:</b> <span style="color:#27ae60; font-weight:bold;">${currentTurnDate}</span><br>
             • <b>अगली पानी की बारी:</b> <span style="color:#d35400; font-weight:bold;">${nextTurnDate}</span><br>
-            • <b>समय:</b> ${item.computedFrom} से ${item.computedTo} (${item.computedDuration})
+            • <b>महीने की आखिरी बारी:</b> <span style="color:#8e44ad; font-weight:bold;">${lastTurnDate}</span><br>
+            • <b>पानी का समय:</b> ${item.computedFrom} से ${item.computedTo} (${item.computedDuration})
         `;
+        
+        printBtn.style.display = "block";
+    }
+
+    function generateSlipHTML(item, index, isOddEven = false) {
+        let straightFrom = item.computedFrom || '-';
+        let straightTo = item.computedTo || '-';
+        let duration = item.computedDuration || '-';
+
+        if (!isOddEven) {
+            // लगातार पर्ची
+            return `
+                <div class="slip-box">
+                    <div class="slip-title">💧 सिंचाई पर्ची (लगातार) 💧</div>
+                    <div class="slip-item">
+                        <b>नाम:</b> ${item.name}<br>
+                        <b>बारी तारीखें:</b> ${waterDates.join(', ') || 'तारीख तय नहीं'}<br>
+                        <b>समय:</b> ${straightFrom} से ${straightTo}<br>
+                        <b>अवधि:</b> ${duration}
+                    </div>
+                    <div class="slip-footer">
+                        सिंचाई प्रबंधन समिति
+                    </div>
+                </div>
+            `;
+        }
+
+        // औड-इवन पर्ची
+        let hoursToDist = parseFloat(document.getElementById('hoursToDistribute').value) || 0;
+        let totalDistMinutes = hoursToDist * 60;
+        let totalBigha = initialData.reduce((sum, r) => sum + (parseFloat(r.bigha) || 0), 0);
+        let startStr = document.getElementById('startTime').value;
+        let tempTime = parseTimeStr(startStr);
+
+        let reverseIndex = initialData.length - 1 - index;
+        let reverseFrom = "", reverseTo = "";
+
+        initialData.slice().reverse().forEach((r, i) => {
+            let bigha = parseFloat(r.bigha) || 0;
+            let extra = parseFloat(r.extra) || 0;
+            let min = totalBigha > 0 ? (bigha / totalBigha) * totalDistMinutes : 0;
+            let totalRowMinutes = min + extra;
+
+            let sFormatted = formatTimeStr(tempTime);
+            let endTime = new Date(tempTime.getTime() + totalRowMinutes * 60 * 1000);
+            let eFormatted = formatTimeStr(endTime);
+
+            if(i === reverseIndex) {
+                reverseFrom = sFormatted;
+                reverseTo = eFormatted;
+            }
+            tempTime = endTime;
+        });
+
+        let straightDates = [];
+        let reverseDates = [];
+
+        waterDates.forEach((d, idx) => {
+            if(idx % 2 === 0) {
+                straightDates.push(d); 
+            } else {
+                reverseDates.push(d);  
+            }
+        });
+
+        return `
+            <div class="slip-box">
+                <div class="slip-title">💧 सिंचाई पर्ची (औड इवन) 💧</div>
+                
+                <div class="slip-item">
+                    <b>1. नाम:</b> ${item.name}<br>
+                    <b>बारी तारीख:</b> ${straightDates.join(', ') || 'तारीख तय नहीं'}<br>
+                    <b>समय:</b> ${straightFrom} से ${straightTo}<br>
+                    <b>अवधि:</b> ${duration}
+                </div>
+
+                <hr style="border: 0.5px dashed #aaa; margin: 4px 0;">
+
+                <div class="slip-item">
+                    <b>2. नाम:</b> ${item.name}<br>
+                    <b>बारी तारीख:</b> ${reverseDates.join(', ') || 'तारीख तय नहीं'}<br>
+                    <b>समय:</b> <span style="color:#c0392b; font-weight:bold;">${reverseFrom} से ${reverseTo}</span><br>
+                    <b>अवधि:</b> ${duration}
+                </div>
+
+                <div class="slip-footer">
+                    सिंचाई प्रबंधन समिति
+                </div>
+            </div>
+        `;
+    }
+
+    function printSingleSlip(idx) {
+        calculateAll();
+        let item = initialData[idx];
+        if (!item) return;
+
+        let area = document.getElementById('printableArea');
+        area.innerHTML = generateSlipHTML(item, idx, false);
+
+        window.print();
+    }
+
+    function printSelectedSlip() {
+        let idx = document.getElementById('userSelect').value;
+        if (idx !== "") {
+            printSingleSlip(parseInt(idx));
+        }
+    }
+
+    function printAllSlips(isOddEven = false) {
+        calculateAll();
+        let area = document.getElementById('printableArea');
+        let fullHTML = "";
+
+        initialData.forEach((item, idx) => {
+            fullHTML += generateSlipHTML(item, idx, isOddEven);
+        });
+
+        area.innerHTML = fullHTML;
+        window.print();
     }
 
     window.onload = function() {
