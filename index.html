@@ -34,7 +34,14 @@
         }
 
         .top-section { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 15px; }
-        .controls-card, .summary-card, .search-card, .notice-card { background: #eef5f9; border: 1px solid #b8daff; border-radius: 6px; padding: 12px; flex: 1; min-width: 260px; }
+        .controls-card, .summary-card, .search-card, .notice-card, .mode-card { background: #eef5f9; border: 1px solid #b8daff; border-radius: 6px; padding: 12px; flex: 1; min-width: 260px; }
+        
+        /* नया मोड सिलेक्शन कार्ड स्टाइल */
+        .mode-card { background: #fef3c7; border-color: #f59e0b; }
+        .mode-card h3 { color: #92400e; border-bottom: 1px solid #f59e0b; margin-top: 0; font-size: 15px; padding-bottom: 5px; }
+        .mode-options { display: flex; gap: 15px; margin-top: 10px; }
+        .mode-options label { font-weight: bold; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 5px; color: #78350f; }
+
         .controls-card h3, .summary-card h3, .search-card h3, .notice-card h3 { margin-top: 0; color: #0c5460; font-size: 15px; border-bottom: 1px solid #b8daff; padding-bottom: 5px; }
         .input-group { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; gap: 8px; }
         .input-group label { font-weight: bold; font-size: 13px; }
@@ -48,7 +55,7 @@
         .notice-content { font-size: 13px; line-height: 1.5; color: #7d6608; white-space: pre-wrap; background: #fff; padding: 8px; border-radius: 4px; border: 1px dashed #f1c40f; min-height: 80px; }
         .notice-textarea { width: 100%; height: 80px; padding: 6px; font-size: 12px; border: 1px solid #f39c12; border-radius: 4px; resize: vertical; }
 
-        .result-box { margin-top: 10px; padding: 12px; background: #ffffff; border: 2px solid #27ae60; border-radius: 6px; font-size: 14px; line-height: 1.6; }
+        .result-box { margin-top: 10px; padding: 12px; background: #ffffff; border: 2px solid #27ae60; border-radius: 6px; font-size: 13px; line-height: 1.6; }
         .summary-table { width: 100%; border-collapse: collapse; }
         .summary-table td { padding: 5px 6px; font-size: 13px; border-bottom: 1px dashed #cbd5e1; }
         .summary-table td.val { text-align: right; font-weight: bold; color: #c0392b; }
@@ -97,7 +104,7 @@
         .btn-action { background: #27ae60; color: #fff; width: 100%; padding: 8px; margin-top: 5px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .btn-view-chart { background: #16a085; color: #fff; border: none; padding: 8px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; margin-top: 8px; width: 100%; }
         .btn-print-slip { background: #e67e22; color: #fff; border: none; padding: 8px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; margin-top: 5px; width: 100%; display: none; }
-        .btn-print-all { background: #8e44ad; color: #fff; border: none; padding: 8px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; margin-top: 8px; width: 100%; }
+        .btn-print-all { background: #8e44ad; color: #fff; border: none; padding: 10px 12px; border-radius: 4px; font-size: 13px; font-weight: bold; cursor: pointer; margin-top: 10px; width: 100%; }
         .btn-row-print { background: #e67e22; color: white; border: none; padding: 4px 8px; font-size: 11px; border-radius: 3px; cursor: pointer; font-weight: bold; }
 
         .full-chart-box { display: none; margin-top: 10px; padding: 10px; background: #fcf3cf; border: 1px solid #f1c40f; border-radius: 5px; font-size: 12px; max-height: 250px; overflow-y: auto; }
@@ -155,12 +162,10 @@
         .slip-footer { margin-top: 4px; text-align: center; font-size: 8.5px; border-top: 1px solid #ccc; padding-top: 2px; color: #555; }
 
         @media print {
-            @page {
-                size: A4 portrait;
-                margin: 10mm;
-            }
+            @page { size: A4 portrait; margin: 10mm; }
             body { background: #fff !important; margin: 0 !important; padding: 0 !important; }
             .container, .toggle-admin-btn, .floating-save-btn, .modal-overlay { display: none !important; }
+            
             #printableArea {
                 display: grid !important;
                 grid-template-columns: repeat(2, 1fr) !important;
@@ -169,10 +174,24 @@
                 margin: 0 !important;
                 padding: 0 !important;
             }
-            .slip-box { 
-                page-break-inside: avoid !important; 
-                break-inside: avoid !important; 
+
+            #printableArea.single-slip-mode { display: block !important; }
+            #printableArea.single-slip-mode .slip-box {
+                width: 100% !important;
+                max-width: 650px !important;
+                min-height: 40vh !important;
+                margin: 30px auto !important;
+                padding: 25px !important;
+                font-size: 16px !important;
+                border: 2px dashed #000 !important;
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: space-between !important;
             }
+            #printableArea.single-slip-mode .slip-title { font-size: 22px !important; padding-bottom: 8px !important; margin-bottom: 15px !important; border-bottom: 2px solid #000 !important; }
+            #printableArea.single-slip-mode .slip-item { font-size: 16px !important; line-height: 2 !important; }
+            #printableArea.single-slip-mode .slip-footer { font-size: 14px !important; padding-top: 12px !important; border-top: 1px solid #000 !important; }
+            .slip-box { page-break-inside: avoid !important; break-inside: avoid !important; }
         }
     </style>
 </head>
@@ -188,7 +207,22 @@
         </div>
     </div>
 
-    <div class="top-section">
+    <!-- नया: पानी बाँटने का तरीका कार्ड -->
+    <div class="mode-card">
+        <h3>🚰 पानी बाँटने का तरीका चुनें:</h3>
+        <div class="mode-options">
+            <label>
+                <input type="radio" name="waterDistributionMode" value="straight" checked onchange="handleModeChange(this.value)"> 
+                <b>1. लगातार (Straight Order)</b>
+            </label>
+            <label>
+                <input type="radio" name="waterDistributionMode" value="oddeven" onchange="handleModeChange(this.value)"> 
+                <b>2. औड-इवन (Odd-Even Order)</b>
+            </label>
+        </div>
+    </div>
+
+    <div class="top-section" style="margin-top: 15px;">
         <div class="search-card">
             <h3>💧 पानी की अगली बारी की जानकारी</h3>
 
@@ -238,19 +272,19 @@
         <div class="summary-card">
             <h3>सारांश (Summary)</h3>
             <table class="summary-table">
-                <tr id="sumBighaRow"><td>कुल बीघा:</td><td class="val" id="sumBigha">45</td></tr>
-                <tr><td>बांटा गया कुल समय (घंटे/मिनट):</td><td class="val" id="displayDistributedHM">11 घंटे 00 मिनट</td></tr>
-                <tr><td>कुल पानी वितरण समय (घंटे/मिनट):</td><td class="val" id="displayTotalDistributionHM">11 घंटे 40 मिनट</td></tr>
-                <tr><td>आखरी बचा समय (घंटे/मिनट):</td><td class="val" id="displayRemainingHours">0 मिनट</td></tr>
+                <tr id="sumBighaRow" class="info-col"><td>कुल बीघा:</td><td class="val" id="sumBigha">45</td></tr>
+                <tr><td>बांटा गया कुल समय:</td><td class="val" id="displayDistributedHM">11 घंटे 00 मिनट</td></tr>
+                <tr><td>कुल पानी वितरण समय:</td><td class="val" id="displayTotalDistributionHM">11 घंटे 40 मिनट</td></tr>
+                <tr><td>आखरी बचा समय:</td><td class="val" id="displayRemainingHours">0 मिनट</td></tr>
             </table>
-            <button class="btn-print-all" onclick="printAllSlips(false)">🖨️ 1 महीने की पर्ची (लगातार)</button>
-            <button class="btn-print-all" style="background: #27ae60;" onclick="printAllSlips(true)">🖨️ 1 महीने की पर्ची (औड इवन)</button>
+            <!-- एकल प्रिंट बटन जो मोड के अनुसार काम करेगा -->
+            <button class="btn-print-all" onclick="printAllSlips()">🖨️ पूरे महीने की सभी पर्चियां प्रिंट करें</button>
         </div>
 
         <div class="controls-card admin-only-block" id="adminControls">
             <h3>एडमिन सेटिंग्स (Admin Only)</h3>
             <div class="input-group">
-                <label for="totalPoolHours">कुल उपलब्ध पानी का समय (घंटे):</label>
+                <label for="totalPoolHours">कुल उपलब्ध पानी समय (घंटे):</label>
                 <input type="number" id="totalPoolHours" value="12" step="0.1" oninput="debouncedCalculate()">
             </div>
             <div class="input-group">
@@ -261,23 +295,16 @@
                 <label for="startTime">शुरुआती समय (Start):</label>
                 <input type="text" id="startTime" value="07:00:00 AM" onchange="calculateAll()">
             </div>
-            
-            <div class="input-group">
-                <label for="sequenceOption">➕ बारी क्रम बदलें:</label>
-                <select id="sequenceOption" onchange="changeSequenceOption(this.value)">
-                    <option value="1">Option 1 (लगातार समान क्रम)</option>
-                    <option value="2">Option 2 (नाम ऊपर-नीचे / उल्टी बारी)</option>
-                </select>
-            </div>
 
-            <button class="btn-action" id="togglePublicInfoBtn" style="background:#3498db; margin-bottom:5px;" onclick="togglePublicInfo()">👁️ नाम/बीघा पब्लिक रखें: चालू</button>
-            <button class="btn-action" style="background:#e67e22; margin-bottom:5px;" onclick="reverseArrayData()">🔄 पूरी सारणी का क्रम उल्टा करें (उल्टा/सीधा क्रम)</button>
+            <button class="btn-action" id="toggleTableVisibilityBtn" style="background:#e74c3c; margin-bottom:5px;" onclick="toggleTableVisibility()">🔒 मेन सारणी (Table) पब्लिक रखें: बंद</button>
+            <button class="btn-action" style="background:#e67e22; margin-bottom:5px;" onclick="reverseArrayData()">🔄 पूरी सारणी का क्रम उल्टा करें</button>
             <button class="btn-action" style="background:#27ae60;" id="saveBtnMain" onclick="saveDataToCloud()">☁️ ऑनलाइन क्लाउड पर सेव करें</button>
             <button class="btn-action" style="background:#8e44ad;" onclick="openChangePassModal()">🔑 पासवर्ड बदलें</button>
         </div>
     </div>
 
-    <div class="table-responsive">
+    <!-- पूरा टेबल वाला सेक्शन -->
+    <div class="table-responsive" id="tableWrapper">
         <table class="main-table" id="scheduleTable">
             <thead>
                 <tr>
@@ -351,10 +378,10 @@
     let isAdmin = false;
     let adminPassword = "2050"; 
     let noticeMessage = "";
-    let isNameBighaPublic = true;
+    let isTablePublic = false; 
+    let selectedMode = "straight"; // 'straight' या 'oddeven'
     let waterDates = [];
     let debounceTimer;
-    let selectedSequenceOption = "1";
 
     let initialData = [
         { name: "श्री जितेन्द्र सिंह नेगी", bigha: 7, extra: 40, amount: "", date: "" },
@@ -386,9 +413,7 @@
 
     function debouncedCalculate() {
         clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => {
-            calculateAll();
-        }, 300);
+        debounceTimer = setTimeout(() => { calculateAll(); }, 300);
     }
 
     function updateNoticeText(val) {
@@ -396,24 +421,19 @@
         document.getElementById('noticeDisplay').innerText = val.trim() !== "" ? val : "कोई विशेष सूचना उपलब्ध नहीं है।";
     }
 
-    function togglePublicInfo() {
-        isNameBighaPublic = !isNameBighaPublic;
+    function toggleTableVisibility() {
+        isTablePublic = !isTablePublic;
         renderTable();
     }
 
-    function changeSequenceOption(val) {
-        selectedSequenceOption = val;
-        if(val === "2") {
-            reverseArrayData();
-        } else {
-            renderTable();
-        }
+    function handleModeChange(val) {
+        selectedMode = val;
+        findMyTurn(); // रिजल्ट बॉक्स को तुरंत अपडेट करें
     }
 
     function moveRow(index, direction) {
         const newIndex = index + direction;
         if (newIndex < 0 || newIndex >= initialData.length) return;
-
         [initialData[index], initialData[newIndex]] = [initialData[newIndex], initialData[index]];
         renderTable();
     }
@@ -495,12 +515,11 @@
                     document.getElementById('noticeInput').value = noticeMessage;
                     updateNoticeText(noticeMessage);
                 }
-                if(data.record.isNameBighaPublic !== undefined) {
-                    isNameBighaPublic = data.record.isNameBighaPublic;
-                }
-                if(data.record.sequenceOption) {
-                    selectedSequenceOption = data.record.sequenceOption;
-                    document.getElementById('sequenceOption').value = selectedSequenceOption;
+                if(data.record.isTablePublic !== undefined) isTablePublic = data.record.isTablePublic;
+                if(data.record.selectedMode) {
+                    selectedMode = data.record.selectedMode;
+                    let radios = document.getElementsByName('waterDistributionMode');
+                    radios.forEach(r => { if(r.value === selectedMode) r.checked = true; });
                 }
                 if(data.record.startDate) document.getElementById('startDateInput').value = data.record.startDate;
                 if(data.record.gapDays) document.getElementById('intervalInput').value = data.record.gapDays;
@@ -525,8 +544,8 @@
             users: initialData,
             password: adminPassword,
             notice: noticeMessage,
-            isNameBighaPublic: isNameBighaPublic,
-            sequenceOption: selectedSequenceOption,
+            isTablePublic: isTablePublic,
+            selectedMode: selectedMode,
             startDate: document.getElementById('startDateInput').value,
             gapDays: document.getElementById('intervalInput').value
         };
@@ -540,11 +559,8 @@
                 },
                 body: JSON.stringify(payload)
             });
-            if(res.ok) {
-                alert("✅ डेटा ऑनलाइन क्लाउड पर सफलता से सेव हो गया!");
-            } else {
-                alert("❌ डेटा सेव करने में समस्या आई!");
-            }
+            if(res.ok) alert("✅ डेटा ऑनलाइन क्लाउड पर सफलता से सेव हो गया!");
+            else alert("❌ डेटा सेव करने में समस्या आई!");
         } catch(e) {
             alert("❌ नेटवर्क की समस्या है!");
         } finally {
@@ -605,27 +621,22 @@
         const tbody = document.getElementById('tableBody');
         tbody.innerHTML = '';
 
-        const showInfo = isAdmin || isNameBighaPublic;
+        const showTable = isAdmin || isTablePublic;
+        document.getElementById('tableWrapper').style.display = showTable ? 'block' : 'none';
 
         document.getElementById('actionHeader').style.display = isAdmin ? 'table-cell' : 'none';
         document.getElementById('floatingSaveBtn').style.display = isAdmin ? 'block' : 'none';
         document.getElementById('editToggleBtn').innerText = isAdmin ? "🔓 Admin Active" : "🔐 Admin Edit";
 
-        let toggleBtn = document.getElementById('togglePublicInfoBtn');
-        if(toggleBtn) {
-            toggleBtn.innerText = isNameBighaPublic ? "👁️ नाम/बीघा पब्लिक रखें: चालू" : "🙈 नाम/बीघा पब्लिक रखें: बंद";
-            toggleBtn.style.background = isNameBighaPublic ? "#3498db" : "#e74c3c";
+        let tableToggleBtn = document.getElementById('toggleTableVisibilityBtn');
+        if(tableToggleBtn) {
+            tableToggleBtn.innerText = isTablePublic ? "👁️ मेन सारणी (Table) पब्लिक रखें: चालू" : "🔒 मेन सारणी (Table) पब्लिक रखें: बंद";
+            tableToggleBtn.style.background = isTablePublic ? "#3498db" : "#e74c3c";
         }
 
         document.querySelectorAll('.admin-only-block').forEach(el => {
             el.style.display = isAdmin ? 'block' : 'none';
         });
-
-        document.querySelectorAll('.info-col').forEach(el => {
-            el.style.display = showInfo ? 'table-cell' : 'none';
-        });
-
-        document.getElementById('sumBighaRow').style.display = showInfo ? 'table-row' : 'none';
 
         initialData.forEach((row, index) => {
             const tr = document.createElement('tr');
@@ -659,15 +670,15 @@
                     <td>
                         <button class="btn-move" onclick="moveRow(${index}, -1)" ${index === 0 ? 'disabled' : ''}>⬆️</button>
                         <button class="btn-move" onclick="moveRow(${index}, 1)" ${index === initialData.length - 1 ? 'disabled' : ''}>⬇️</button>
-                        <button class="btn-insert" onclick="insertRowAfter(${index})">➕ नीचे नाम जोड़ें</button>
+                        <button class="btn-insert" onclick="insertRowAfter(${index})">➕ नीचे जोड़ें</button>
                         <button class="btn-delete" onclick="deleteRow(${index})">❌ हटाएँ</button>
                     </td>
                 `;
             } else {
                 tr.innerHTML = `
-                    ${showInfo ? `<td class="info-col">${index + 1}</td>` : ''}
-                    ${showInfo ? `<td class="info-col" style="text-align: left; font-weight:bold;">${row.name}</td>` : ''}
-                    ${showInfo ? `<td class="info-col">${row.bigha}</td>` : ''}
+                    <td class="info-col">${index + 1}</td>
+                    <td class="info-col" style="text-align: left; font-weight:bold;">${row.name}</td>
+                    <td class="info-col">${row.bigha}</td>
                     <td class="col-min">0</td>
                     <td class="col-hm">0</td>
                     <td>${row.extra || '-'}</td>
@@ -693,40 +704,15 @@
     }
 
     function deleteRow(index) {
-        if(initialData.length <= 1) {
-            alert("कम से कम एक नाम रखना जरूरी है।");
-            return;
-        }
-
+        if(initialData.length <= 1) return alert("कम से कम एक नाम रखना जरूरी है।");
         if (!confirm("क्या आप इस पंक्ति को हटाना चाहते हैं?")) return;
-
         initialData.splice(index, 1);
         renderTable();
     }
 
     function insertRowAfter(index) {
-        initialData.splice(index + 1, 0, {
-            name: "नया व्यक्ति",
-            bigha: 1,
-            extra: "",
-            amount: "",
-            date: ""
-        });
-
+        initialData.splice(index + 1, 0, { name: "नया व्यक्ति", bigha: 1, extra: "", amount: "", date: "" });
         renderTable();
-
-        setTimeout(() => {
-            const rows = document.querySelectorAll('#tableBody tr');
-            const newRow = rows[index + 1];
-            if (newRow) {
-                newRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                const nameInput = newRow.querySelector('input[type="text"]');
-                if (nameInput) {
-                    nameInput.focus();
-                    nameInput.select();
-                }
-            }
-        }, 50);
     }
 
     function parseTimeStr(timeStr) {
@@ -748,8 +734,7 @@
         let mins = dateObj.getMinutes();
         let secs = dateObj.getSeconds();
         let ampm = hrs >= 12 ? 'PM' : 'AM';
-        hrs = hrs % 12;
-        hrs = hrs ? hrs : 12;
+        hrs = hrs % 12; hrs = hrs ? hrs : 12;
         return `${hrs < 10 ? '0' + hrs : hrs}:${mins < 10 ? '0' + mins : mins}:${secs < 10 ? '0' + secs : secs} ${ampm}`;
     }
 
@@ -757,11 +742,7 @@
         let roundedMin = Math.round(totalMinutes);
         let hrs = Math.floor(roundedMin / 60);
         let mins = roundedMin % 60;
-        if (hrs > 0) {
-            return `${hrs} घंटे ${mins} मिनट`;
-        } else {
-            return `${mins} मिनट`;
-        }
+        return hrs > 0 ? `${hrs} घंटे ${mins} मिनट` : `${mins} मिनट`;
     }
 
     function calculateAll() {
@@ -771,17 +752,12 @@
 
         let totalBigha = initialData.reduce((sum, r) => sum + (parseFloat(r.bigha) || 0), 0);
         let totalExtra = initialData.reduce((sum, r) => sum + (parseFloat(r.extra) || 0), 0);
-        
         let totalAmount = initialData.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
-        document.getElementById('totalAmountFoot').innerText = totalAmount > 0 ? totalAmount + " रु०" : "0 रु०";
 
+        document.getElementById('totalAmountFoot').innerText = totalAmount > 0 ? totalAmount + " रु०" : "0 रु०";
         document.getElementById('sumBigha').innerText = totalBigha;
         document.getElementById('totalBighaFoot').innerText = totalBigha;
-
-        let extraFootEl = document.getElementById('totalExtraFoot');
-        if (extraFootEl) {
-            extraFootEl.innerText = totalExtra > 0 ? totalExtra + " मिनट" : "-";
-        }
+        document.getElementById('totalExtraFoot').innerText = totalExtra > 0 ? totalExtra + " मिनट" : "-";
 
         let totalDistMinutes = hoursToDist * 60;
         document.getElementById('displayDistributedHM').innerText = formatHM(totalDistMinutes);
@@ -803,8 +779,7 @@
             let totalRowMinutes = min + extra;
 
             let startFormatted = formatTimeStr(currentStartTime);
-            let totalDurationMs = totalRowMinutes * 60 * 1000;
-            let endTime = new Date(currentStartTime.getTime() + totalDurationMs);
+            let endTime = new Date(currentStartTime.getTime() + totalRowMinutes * 60 * 1000);
             let endFormatted = formatTimeStr(endTime);
 
             row.computedFrom = startFormatted;
@@ -840,16 +815,14 @@
             let totalRemSec = Math.round(remainingMs / 1000);
             let remMin = Math.floor(totalRemSec / 60);
             let remSec = totalRemSec % 60;
-
             let remStr = "";
             if (remMin > 0) remStr += `${remMin} मिनट `;
             if (remSec > 0) remStr += `${remSec} सेकंड`;
-            if (remMin === 0 && remSec === 0) remStr = "0 मिनट";
-
-            document.getElementById('displayRemainingHours').innerText = remStr.trim();
+            document.getElementById('displayRemainingHours').innerText = remStr.trim() || "0 मिनट";
         }
     }
 
+    // नाम चुनने पर चुने गए 'मोड' के आधार पर जानकारी दिखाने वाला फंक्शन
     function findMyTurn() {
         let idx = document.getElementById('userSelect').value;
         let resultDiv = document.getElementById('turnResult');
@@ -865,22 +838,64 @@
 
         let item = initialData[idx];
         let targetRow = document.getElementById(`row-${idx}`);
-        if(targetRow) {
+        if(targetRow && (isAdmin || isTablePublic)) {
             targetRow.classList.add('highlight-row');
             targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }
 
-        let currentTurnDate = waterDates[0] || "तारीख तय नहीं";
-        let nextTurnDate = waterDates[1] || "इसके बाद की तारीख तय नहीं";
-        let lastTurnDate = waterDates[waterDates.length - 1] || "तारीख तय नहीं";
+        if (selectedMode === "straight") {
+            // लगातार मोड में जानकारी
+            resultDiv.innerHTML = `
+                💧 <b>${item.name} जी की बारी (लगातार):</b><br>
+                • <b>पानी की तारीखें:</b> <span style="color:#27ae60; font-weight:bold;">${waterDates.join(', ') || 'तारीख तय नहीं'}</span><br>
+                • <b>पानी का समय:</b> ${item.computedFrom} से ${item.computedTo}<br>
+                • <b>कुल समय अवधि:</b> ${item.computedDuration}
+            `;
+        } else {
+            // औड-इवन मोड में जानकारी (रिवर्स टाइम की गणना)
+            let hoursToDist = parseFloat(document.getElementById('hoursToDistribute').value) || 0;
+            let totalDistMinutes = hoursToDist * 60;
+            let totalBigha = initialData.reduce((sum, r) => sum + (parseFloat(r.bigha) || 0), 0);
+            let startStr = document.getElementById('startTime').value;
+            let tempTime = parseTimeStr(startStr);
 
-        resultDiv.innerHTML = `
-            💧 <b>${item.name} जी की बारी:</b><br>
-            • <b>वर्तमान बारी तारीख:</b> <span style="color:#27ae60; font-weight:bold;">${currentTurnDate}</span><br>
-            • <b>अगली पानी की बारी:</b> <span style="color:#d35400; font-weight:bold;">${nextTurnDate}</span><br>
-            • <b>महीने की आखिरी बारी:</b> <span style="color:#8e44ad; font-weight:bold;">${lastTurnDate}</span><br>
-            • <b>पानी का समय:</b> ${item.computedFrom} से ${item.computedTo} (${item.computedDuration})
-        `;
+            let reverseIndex = initialData.length - 1 - idx;
+            let reverseFrom = "", reverseTo = "";
+
+            initialData.slice().reverse().forEach((r, i) => {
+                let bigha = parseFloat(r.bigha) || 0;
+                let extra = parseFloat(r.extra) || 0;
+                let min = totalBigha > 0 ? (bigha / totalBigha) * totalDistMinutes : 0;
+                let totalRowMinutes = min + extra;
+
+                let sFormatted = formatTimeStr(tempTime);
+                let endTime = new Date(tempTime.getTime() + totalRowMinutes * 60 * 1000);
+                let eFormatted = formatTimeStr(endTime);
+
+                if(i === reverseIndex) {
+                    reverseFrom = sFormatted;
+                    reverseTo = eFormatted;
+                }
+                tempTime = endTime;
+            });
+
+            let straightDates = [];
+            let reverseDates = [];
+            waterDates.forEach((d, i) => {
+                if(i % 2 === 0) straightDates.push(d);
+                else reverseDates.push(d);
+            });
+
+            resultDiv.innerHTML = `
+                💧 <b>${item.name} जी की बारी (औड-इवन):</b><br><br>
+                <b>1. सीधी बारी:</b><br>
+                • तारीखें: <span style="color:#27ae60; font-weight:bold;">${straightDates.join(', ') || 'तारीख तय नहीं'}</span><br>
+                • समय: ${item.computedFrom} से ${item.computedTo} (${item.computedDuration})<br><br>
+                <b>2. उल्टी/रिवर्स बारी:</b><br>
+                • तारीखें: <span style="color:#d35400; font-weight:bold;">${reverseDates.join(', ') || 'तारीख तय नहीं'}</span><br>
+                • समय: <span style="color:#c0392b; font-weight:bold;">${reverseFrom} से ${reverseTo}</span> (${item.computedDuration})
+            `;
+        }
         
         printBtn.style.display = "block";
     }
@@ -891,7 +906,6 @@
         let duration = item.computedDuration || '-';
 
         if (!isOddEven) {
-            // लगातार पर्ची
             return `
                 <div class="slip-box">
                     <div class="slip-title">💧 सिंचाई पर्ची (लगातार) 💧</div>
@@ -901,14 +915,11 @@
                         <b>समय:</b> ${straightFrom} से ${straightTo}<br>
                         <b>अवधि:</b> ${duration}
                     </div>
-                    <div class="slip-footer">
-                        सिंचाई प्रबंधन समिति
-                    </div>
+                    <div class="slip-footer">सिंचाई प्रबंधन समिति</div>
                 </div>
             `;
         }
 
-        // औड-इवन पर्ची
         let hoursToDist = parseFloat(document.getElementById('hoursToDistribute').value) || 0;
         let totalDistMinutes = hoursToDist * 60;
         let totalBigha = initialData.reduce((sum, r) => sum + (parseFloat(r.bigha) || 0), 0);
@@ -937,18 +948,14 @@
 
         let straightDates = [];
         let reverseDates = [];
-
         waterDates.forEach((d, idx) => {
-            if(idx % 2 === 0) {
-                straightDates.push(d); 
-            } else {
-                reverseDates.push(d);  
-            }
+            if(idx % 2 === 0) straightDates.push(d); 
+            else reverseDates.push(d);  
         });
 
         return `
             <div class="slip-box">
-                <div class="slip-title">💧 सिंचाई पर्ची (औड इवन) 💧</div>
+                <div class="slip-title">💧 सिंचाई पर्ची (औड-इवन) 💧</div>
                 
                 <div class="slip-item">
                     <b>1. नाम:</b> ${item.name}<br>
@@ -966,9 +973,7 @@
                     <b>अवधि:</b> ${duration}
                 </div>
 
-                <div class="slip-footer">
-                    सिंचाई प्रबंधन समिति
-                </div>
+                <div class="slip-footer">सिंचाई प्रबंधन समिति</div>
             </div>
         `;
     }
@@ -979,22 +984,29 @@
         if (!item) return;
 
         let area = document.getElementById('printableArea');
-        area.innerHTML = generateSlipHTML(item, idx, false);
+        area.className = "single-slip-mode";
+        
+        // सेलेक्ट किए गए मोड के आधार पर पर्ची जनरेट करें
+        let isOddEven = (selectedMode === "oddeven");
+        area.innerHTML = generateSlipHTML(item, idx, isOddEven);
 
         window.print();
+        area.className = "";
+        area.innerHTML = "";
     }
 
     function printSelectedSlip() {
         let idx = document.getElementById('userSelect').value;
-        if (idx !== "") {
-            printSingleSlip(parseInt(idx));
-        }
+        if (idx !== "") printSingleSlip(parseInt(idx));
     }
 
-    function printAllSlips(isOddEven = false) {
+    // एकल प्रिंट बटन फंक्शन: वर्तमान में सेलेक्टेड 'मोड' के अनुसार ही सारी पर्चियां प्रिंट करेगा
+    function printAllSlips() {
         calculateAll();
         let area = document.getElementById('printableArea');
+        area.className = ""; 
         let fullHTML = "";
+        let isOddEven = (selectedMode === "oddeven");
 
         initialData.forEach((item, idx) => {
             fullHTML += generateSlipHTML(item, idx, isOddEven);
@@ -1002,6 +1014,7 @@
 
         area.innerHTML = fullHTML;
         window.print();
+        area.innerHTML = "";
     }
 
     window.onload = function() {
