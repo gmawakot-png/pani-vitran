@@ -34,13 +34,20 @@
         }
 
         .top-section { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 15px; }
-        .controls-card, .summary-card, .search-card { background: #eef5f9; border: 1px solid #b8daff; border-radius: 6px; padding: 12px; flex: 1; min-width: 280px; }
-        .controls-card h3, .summary-card h3, .search-card h3 { margin-top: 0; color: #0c5460; font-size: 15px; border-bottom: 1px solid #b8daff; padding-bottom: 5px; }
+        .controls-card, .summary-card, .search-card, .notice-card { background: #eef5f9; border: 1px solid #b8daff; border-radius: 6px; padding: 12px; flex: 1; min-width: 260px; }
+        .controls-card h3, .summary-card h3, .search-card h3, .notice-card h3 { margin-top: 0; color: #0c5460; font-size: 15px; border-bottom: 1px solid #b8daff; padding-bottom: 5px; }
         .input-group { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; gap: 8px; }
         .input-group label { font-weight: bold; font-size: 13px; }
         .input-group input, .input-group select { width: 160px; padding: 6px 8px; font-size: 13px; border: 1px solid #ccc; border-radius: 4px; text-align: right; font-weight: bold; }
+        
         .search-card { background: #e8f8f5; border-color: #a3e4d7; }
         .search-card h3 { color: #117a65; border-color: #a3e4d7; }
+        
+        .notice-card { background: #fef9e7; border-color: #f9e79f; }
+        .notice-card h3 { color: #b7950b; border-color: #f9e79f; }
+        .notice-content { font-size: 13px; line-height: 1.5; color: #7d6608; white-space: pre-wrap; background: #fff; padding: 8px; border-radius: 4px; border: 1px dashed #f1c40f; min-height: 80px; }
+        .notice-textarea { width: 100%; height: 80px; padding: 6px; font-size: 12px; border: 1px solid #f39c12; border-radius: 4px; resize: vertical; }
+
         .result-box { margin-top: 10px; padding: 12px; background: #ffffff; border: 2px solid #27ae60; border-radius: 6px; font-size: 14px; line-height: 1.6; }
         .summary-table { width: 100%; border-collapse: collapse; }
         .summary-table td { padding: 5px 6px; font-size: 13px; border-bottom: 1px dashed #cbd5e1; }
@@ -52,9 +59,9 @@
         table.main-table th.red-txt, table.main-table td.red-txt { color: #c0392b; }
         tr.highlight-row { background-color: #d4efdf !important; font-weight: bold; }
         
-        .admin-only { display: none; }
+        .admin-only-block { display: none; }
         
-        /* Floating Admin Button (दाएँ तरफ सबसे नीचे) */
+        /* Floating Admin Button */
         .toggle-admin-btn { 
             position: fixed; 
             bottom: 20px; 
@@ -71,7 +78,7 @@
             z-index: 1000;
         }
 
-        /* Floating Save Button (Admin Button के ठीक ऊपर) */
+        /* Floating Save Button */
         .floating-save-btn {
             position: fixed; 
             bottom: 70px; 
@@ -89,7 +96,7 @@
             display: none;
         }
 
-        .btn-action { background: #27ae60; color: #fff; width: 100%; padding: 6px; margin-top: 5px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        .btn-action { background: #27ae60; color: #fff; width: 100%; padding: 8px; margin-top: 5px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
         .btn-view-chart { background: #16a085; color: #fff; border: none; padding: 8px 12px; border-radius: 4px; font-size: 12px; font-weight: bold; cursor: pointer; margin-top: 8px; width: 100%; }
         .full-chart-box { display: none; margin-top: 10px; padding: 10px; background: #fcf3cf; border: 1px solid #f1c40f; border-radius: 5px; font-size: 12px; max-height: 250px; overflow-y: auto; }
         
@@ -149,7 +156,7 @@
                 </select>
             </div>
 
-            <div class="admin-date-controls admin-only-block" id="directAdminDateBox" style="display:none;">
+            <div class="admin-date-controls admin-only-block" id="directAdminDateBox">
                 <b style="color:#1e8449; font-size:12px;">⚙️ वर्तमान तारीख व दिन का अंतर (गैप) बदलें:</b>
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px; gap:8px;">
                     <div>
@@ -175,6 +182,16 @@
             </div>
         </div>
 
+        <!-- सूचना/विवरण का नया बॉक्स -->
+        <div class="notice-card">
+            <h3>📢 सूचना एवं विवरण</h3>
+            <div id="noticeDisplay" class="notice-content">कोई विशेष सूचना उपलब्ध नहीं है।</div>
+            <div class="admin-only-block" style="margin-top: 8px;">
+                <label style="font-size:11px; font-weight:bold; display:block; margin-bottom:4px;">एडमिन संदेश संपादन (Edit Message):</label>
+                <textarea id="noticeInput" class="notice-textarea" placeholder="यहाँ सभी के लिए सूचना/संदेश लिखें..." oninput="updateNoticeText(this.value)"></textarea>
+            </div>
+        </div>
+
         <div class="summary-card">
             <h3>सारांश (Summary)</h3>
             <table class="summary-table">
@@ -185,22 +202,22 @@
             </table>
         </div>
 
-        <div class="controls-card admin-only-block" id="adminControls" style="display:none;">
+        <div class="controls-card admin-only-block" id="adminControls">
             <h3>एडमिन सेटिंग्स (Admin Only)</h3>
             <div class="input-group">
-                <label for="totalPoolHours">कुल उपलब्ध पानी का समय (घंटे/मिनट):</label>
-                <input type="number" id="totalPoolHours" value="12" step="0.1" oninput="calculateAll()">
+                <label for="totalPoolHours">कुल उपलब्ध पानी का समय (घंटे):</label>
+                <input type="number" id="totalPoolHours" value="12" step="0.1" oninput="debouncedCalculate()">
             </div>
             <div class="input-group">
                 <label for="hoursToDistribute">कुल घंटे बाँटने हैं:</label>
-                <input type="number" id="hoursToDistribute" value="11" step="0.1" oninput="calculateAll()">
+                <input type="number" id="hoursToDistribute" value="11" step="0.1" oninput="debouncedCalculate()">
             </div>
             <div class="input-group">
                 <label for="startTime">शुरुआती समय (Start):</label>
                 <input type="text" id="startTime" value="07:00:00 AM" onchange="calculateAll()">
             </div>
             
-            <button class="btn-action" style="background:#27ae60;" onclick="saveDataToCloud()">☁️ ऑनलाइन क्लाउड पर सेव करें</button>
+            <button class="btn-action" style="background:#27ae60;" id="saveBtnMain" onclick="saveDataToCloud()">☁️ ऑनलाइन क्लाउड पर सेव करें</button>
             <button class="btn-action" style="background:#8e44ad;" onclick="openChangePassModal()">🔑 पासवर्ड बदलें</button>
         </div>
     </div>
@@ -230,14 +247,16 @@
                     <td id="totalMinFoot">657</td>
                     <td id="totalHMFoot">10 घंटे 57 मिनट</td>
                     <td id="totalExtraFoot" class="red-txt">-</td>
-                    <td colspan="5"></td>
+                    <td colspan="2"></td>
+                    <td id="totalAmountFoot" style="color:#27ae60; font-size:13px;">0</td>
+                    <td colspan="2"></td>
                 </tr>
             </tfoot>
         </table>
     </div>
 </div>
 
-<!-- दाएँ तरफ Floating Buttons -->
+<!-- Floating Buttons -->
 <button class="floating-save-btn" id="floatingSaveBtn" onclick="saveDataToCloud()">💾 सभी बदलाव क्लाउड पर सेव करें</button>
 <button class="toggle-admin-btn" onclick="openAdminModal()" id="editToggleBtn">🔐 Admin Edit</button>
 
@@ -275,7 +294,9 @@
 
     let isAdmin = false;
     let adminPassword = "2050"; 
+    let noticeMessage = "";
     let waterDates = [];
+    let debounceTimer;
 
     let initialData = [
         { name: "श्री जितेन्द्र सिंह नेगी", bigha: 7, extra: 40, amount: "", date: "" },
@@ -305,6 +326,18 @@
     setInterval(updateLiveClock, 1000);
     updateLiveClock();
 
+    function debouncedCalculate() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(() => {
+            calculateAll();
+        }, 300);
+    }
+
+    function updateNoticeText(val) {
+        noticeMessage = val;
+        document.getElementById('noticeDisplay').innerText = val.trim() !== "" ? val : "कोई विशेष सूचना उपलब्ध नहीं है।";
+    }
+
     function moveRow(index, direction) {
         const newIndex = index + direction;
         if (newIndex < 0 || newIndex >= initialData.length) return;
@@ -321,7 +354,7 @@
     function openAdminModal() {
         if(isAdmin) {
             isAdmin = false;
-            alert("व्यू मोड चालू। (एडमिन बटन बंद)");
+            alert("व्यू मोड चालू। (एडमिन एडिट बंद)");
             renderTable();
         } else {
             document.getElementById('adminPassInput').value = '';
@@ -338,7 +371,7 @@
         if(pass === adminPassword) {
             isAdmin = true;
             closeAdminModal();
-            alert("एडमिन मोड चालू हो गया है! अब आप सभी बटन और नाम देख सकते हैं।");
+            alert("एडमिन मोड चालू हो गया है!");
             renderTable();
         } else {
             alert("गलत पासवर्ड!");
@@ -362,7 +395,7 @@
             if(newP && newP.trim() !== "") {
                 adminPassword = newP.trim();
                 closeChangePassModal();
-                alert("पासवर्ड बदल दिया गया! कृपया ऑनलाइन क्लाउड पर सेव करें।");
+                alert("पासवर्ड बदल दिया गया! कृपया क्लाउड पर सेव करें।");
             } else {
                 alert("कृपया नया पासवर्ड दर्ज करें!");
             }
@@ -380,6 +413,11 @@
             if(data.record) {
                 if(data.record.users) initialData = data.record.users;
                 if(data.record.password) adminPassword = data.record.password;
+                if(data.record.notice) {
+                    noticeMessage = data.record.notice;
+                    document.getElementById('noticeInput').value = noticeMessage;
+                    updateNoticeText(noticeMessage);
+                }
                 if(data.record.startDate) document.getElementById('startDateInput').value = data.record.startDate;
                 if(data.record.gapDays) document.getElementById('intervalInput').value = data.record.gapDays;
                 generate30DaysCalendar();
@@ -391,9 +429,18 @@
     }
 
     async function saveDataToCloud() {
+        let saveBtnMain = document.getElementById('saveBtnMain');
+        let floatBtn = document.getElementById('floatingSaveBtn');
+        
+        saveBtnMain.innerText = "⏳ सेव हो रहा है...";
+        floatBtn.innerText = "⏳ सेव हो रहा है...";
+        saveBtnMain.disabled = true;
+        floatBtn.disabled = true;
+
         let payload = {
             users: initialData,
             password: adminPassword,
+            notice: noticeMessage,
             startDate: document.getElementById('startDateInput').value,
             gapDays: document.getElementById('intervalInput').value
         };
@@ -408,12 +455,17 @@
                 body: JSON.stringify(payload)
             });
             if(res.ok) {
-                alert("✅ डेटा ऑनलाइन क्लाउड पर सेव हो गया!");
+                alert("✅ डेटा ऑनलाइन क्लाउड पर सफलता से सेव हो गया!");
             } else {
                 alert("❌ डेटा सेव करने में समस्या आई!");
             }
         } catch(e) {
             alert("❌ नेटवर्क की समस्या है!");
+        } finally {
+            saveBtnMain.innerText = "☁️ ऑनलाइन क्लाउड पर सेव करें";
+            floatBtn.innerText = "💾 सभी बदलाव क्लाउड पर सेव करें";
+            saveBtnMain.disabled = false;
+            floatBtn.disabled = false;
         }
     }
 
@@ -496,10 +548,10 @@
                     <td class="col-from">-</td>
                     <td class="col-to">-</td>
                     <td>
-                        <input type="text" class="clean-input" value="${row.amount}" style="width:65px; text-align:center;" oninput="updateData(${index}, 'amount', this.value)">
+                        <input type="number" class="clean-input" value="${row.amount}" style="width:65px; text-align:center;" oninput="updateData(${index}, 'amount', parseFloat(this.value)||0)">
                     </td>
                     <td>
-                        <input type="text" class="clean-input" value="${row.date}" style="width:85px; text-align:center;" oninput="updateData(${index}, 'date', this.value)">
+                        <input type="text" class="clean-input" value="${row.date || ''}" style="width:85px; text-align:center;" oninput="updateData(${index}, 'date', this.value)">
                     </td>
                     <td>
                         <button class="btn-move" onclick="moveRow(${index}, -1)" ${index === 0 ? 'disabled' : ''}>⬆️</button>
@@ -518,7 +570,7 @@
                     <td>${row.extra || '-'}</td>
                     <td class="col-from" style="font-weight:bold; color:#196f3d;">-</td>
                     <td class="col-to" style="font-weight:bold; color:#c0392b;">-</td>
-                    <td>${row.amount || '-'}</td>
+                    <td>${row.amount ? row.amount + ' रु०' : '-'}</td>
                     <td>${row.date || '-'}</td>
                 `;
             }
@@ -531,7 +583,7 @@
 
     function updateData(index, field, value) {
         initialData[index][field] = value;
-        calculateAll();
+        debouncedCalculate();
     }
 
     function deleteRow(index) {
@@ -613,6 +665,10 @@
 
         let totalBigha = initialData.reduce((sum, r) => sum + (parseFloat(r.bigha) || 0), 0);
         let totalExtra = initialData.reduce((sum, r) => sum + (parseFloat(r.extra) || 0), 0);
+        
+        // कुल धनराशि का योग
+        let totalAmount = initialData.reduce((sum, r) => sum + (parseFloat(r.amount) || 0), 0);
+        document.getElementById('totalAmountFoot').innerText = totalAmount > 0 ? totalAmount + " रु०" : "0 रु०";
 
         document.getElementById('sumBigha').innerText = totalBigha;
         document.getElementById('totalBighaFoot').innerText = totalBigha;
