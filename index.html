@@ -36,11 +36,11 @@
         .top-section { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 15px; }
         .controls-card, .summary-card, .search-card, .notice-card, .mode-card { background: #eef5f9; border: 1px solid #b8daff; border-radius: 6px; padding: 12px; flex: 1; min-width: 260px; }
         
-        /* नया मोड सिलेक्शन कार्ड स्टाइल */
-        .mode-card { background: #fef3c7; border-color: #f59e0b; }
+        /* एडमिन मोड सिलेक्शन स्टाइल */
+        .mode-card { background: #fef3c7; border-color: #f59e0b; margin-bottom: 12px; }
         .mode-card h3 { color: #92400e; border-bottom: 1px solid #f59e0b; margin-top: 0; font-size: 15px; padding-bottom: 5px; }
-        .mode-options { display: flex; gap: 15px; margin-top: 10px; }
-        .mode-options label { font-weight: bold; font-size: 14px; cursor: pointer; display: flex; align-items: center; gap: 5px; color: #78350f; }
+        .mode-options { display: flex; gap: 15px; margin-top: 8px; flex-wrap: wrap; }
+        .mode-options label { font-weight: bold; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 5px; color: #78350f; }
 
         .controls-card h3, .summary-card h3, .search-card h3, .notice-card h3 { margin-top: 0; color: #0c5460; font-size: 15px; border-bottom: 1px solid #b8daff; padding-bottom: 5px; }
         .input-group { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; gap: 8px; }
@@ -207,21 +207,6 @@
         </div>
     </div>
 
-    <!-- नया: पानी बाँटने का तरीका कार्ड -->
-    <div class="mode-card">
-        <h3>🚰 पानी बाँटने का तरीका चुनें:</h3>
-        <div class="mode-options">
-            <label>
-                <input type="radio" name="waterDistributionMode" value="straight" checked onchange="handleModeChange(this.value)"> 
-                <b>1. लगातार (Straight Order)</b>
-            </label>
-            <label>
-                <input type="radio" name="waterDistributionMode" value="oddeven" onchange="handleModeChange(this.value)"> 
-                <b>2. औड-इवन (Odd-Even Order)</b>
-            </label>
-        </div>
-    </div>
-
     <div class="top-section" style="margin-top: 15px;">
         <div class="search-card">
             <h3>💧 पानी की अगली बारी की जानकारी</h3>
@@ -272,17 +257,31 @@
         <div class="summary-card">
             <h3>सारांश (Summary)</h3>
             <table class="summary-table">
-                <tr id="sumBighaRow" class="info-col"><td>कुल बीघा:</td><td class="val" id="sumBigha">45.5</td></tr>
+                <tr id="sumBighaRow" class="info-col"><td>कुल बीघा:</td><td class="val" id="sumBigha">-</td></tr>
                 <tr><td>बांटा गया कुल समय:</td><td class="val" id="displayDistributedHM">11 घंटे 00 मिनट</td></tr>
                 <tr><td>कुल पानी वितरण समय:</td><td class="val" id="displayTotalDistributionHM">11 घंटे 40 मिनट</td></tr>
                 <tr><td>आखरी बचा समय:</td><td class="val" id="displayRemainingHours">0 मिनट</td></tr>
             </table>
-            <!-- एकल प्रिंट बटन जो मोड के अनुसार काम करेगा -->
-            <button class="btn-print-all" onclick="printAllSlips()">🖨️ पूरे महीने की सभी पर्चियां प्रिंट करें</button>
         </div>
 
         <div class="controls-card admin-only-block" id="adminControls">
             <h3>एडमिन सेटिंग्स (Admin Only)</h3>
+
+            <!-- पानी बाँटने का तरीका अब एडमिन पैनल के अंदर है -->
+            <div class="mode-card">
+                <h3>🚰 पानी बाँटने का तरीका चुनें:</h3>
+                <div class="mode-options">
+                    <label>
+                        <input type="radio" name="waterDistributionMode" value="straight" checked onchange="handleModeChange(this.value)"> 
+                        <b>1. लगातार (Straight)</b>
+                    </label>
+                    <label>
+                        <input type="radio" name="waterDistributionMode" value="oddeven" onchange="handleModeChange(this.value)"> 
+                        <b>2. औड-इवन (Odd-Even)</b>
+                    </label>
+                </div>
+            </div>
+
             <div class="input-group">
                 <label for="totalPoolHours">कुल उपलब्ध पानी समय (घंटे):</label>
                 <input type="number" id="totalPoolHours" value="12" step="0.1" oninput="debouncedCalculate()">
@@ -300,6 +299,8 @@
             <button class="btn-action" style="background:#e67e22; margin-bottom:5px;" onclick="reverseArrayData()">🔄 पूरी सारणी का क्रम उल्टा करें</button>
             <button class="btn-action" style="background:#27ae60;" id="saveBtnMain" onclick="saveDataToCloud()">☁️ ऑनलाइन क्लाउड पर सेव करें</button>
             <button class="btn-action" style="background:#8e44ad;" onclick="openChangePassModal()">🔑 पासवर्ड बदलें</button>
+            
+            <button class="btn-print-all" onclick="printAllSlips()">🖨️ पूरे महीने की सभी पर्चियां प्रिंट करें</button>
         </div>
     </div>
 
@@ -325,7 +326,7 @@
             <tbody id="tableBody"></tbody>
             <tfoot>
                 <tr style="background:#f2f2f2; font-weight:bold;">
-                    <td colspan="3" class="info-col">कुल बीघा: <span id="totalBighaFoot">45.5</span></td>
+                    <td colspan="3" class="info-col">कुल बीघा: <span id="totalBighaFoot">-</span></td>
                     <td id="totalMinFoot">657</td>
                     <td id="totalHMFoot">10 घंटे 57 मिनट</td>
                     <td id="totalExtraFoot" class="red-txt">-</td>
@@ -428,7 +429,7 @@
 
     function handleModeChange(val) {
         selectedMode = val;
-        findMyTurn(); // रिजल्ट बॉक्स को तुरंत अपडेट करें
+        findMyTurn();
     }
 
     function moveRow(index, direction) {
@@ -523,11 +524,12 @@
                 }
                 if(data.record.startDate) document.getElementById('startDateInput').value = data.record.startDate;
                 if(data.record.gapDays) document.getElementById('intervalInput').value = data.record.gapDays;
-                generate30DaysCalendar();
-                renderTable();
             }
         } catch(e) {
             console.log("Error loading cloud data", e);
+        } finally {
+            generate30DaysCalendar();
+            renderTable();
         }
     }
 
@@ -822,7 +824,6 @@
         }
     }
 
-    // नाम चुनने पर चुने गए 'मोड' के आधार पर जानकारी दिखाने वाला फंक्शन
     function findMyTurn() {
         let idx = document.getElementById('userSelect').value;
         let resultDiv = document.getElementById('turnResult');
@@ -844,7 +845,6 @@
         }
 
         if (selectedMode === "straight") {
-            // लगातार मोड में जानकारी
             resultDiv.innerHTML = `
                 💧 <b>${item.name} जी की बारी (लगातार):</b><br>
                 • <b>पानी की तारीखें:</b> <span style="color:#27ae60; font-weight:bold;">${waterDates.join(', ') || 'तारीख तय नहीं'}</span><br>
@@ -852,7 +852,6 @@
                 • <b>कुल समय अवधि:</b> ${item.computedDuration}
             `;
         } else {
-            // औड-इवन मोड में जानकारी (रिवर्स टाइम की गणना)
             let hoursToDist = parseFloat(document.getElementById('hoursToDistribute').value) || 0;
             let totalDistMinutes = hoursToDist * 60;
             let totalBigha = initialData.reduce((sum, r) => sum + (parseFloat(r.bigha) || 0), 0);
@@ -986,7 +985,6 @@
         let area = document.getElementById('printableArea');
         area.className = "single-slip-mode";
         
-        // सेलेक्ट किए गए मोड के आधार पर पर्ची जनरेट करें
         let isOddEven = (selectedMode === "oddeven");
         area.innerHTML = generateSlipHTML(item, idx, isOddEven);
 
@@ -1000,7 +998,6 @@
         if (idx !== "") printSingleSlip(parseInt(idx));
     }
 
-    // एकल प्रिंट बटन फंक्शन: वर्तमान में सेलेक्टेड 'मोड' के अनुसार ही सारी पर्चियां प्रिंट करेगा
     function printAllSlips() {
         calculateAll();
         let area = document.getElementById('printableArea');
@@ -1020,8 +1017,6 @@
     window.onload = function() {
         let today = new Date().toISOString().split('T')[0];
         document.getElementById('startDateInput').value = today;
-        generate30DaysCalendar();
-        renderTable();
         loadDataFromCloud();
     };
 </script>
