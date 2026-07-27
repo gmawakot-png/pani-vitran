@@ -372,7 +372,6 @@
 </div>
 
 <script>
-    // updated ID
     const BIN_ID = "6a675d6dda38895dfe966712"; 
     const MASTER_KEY = "$2a$10$JcvEWN7NJzepZ2xuDKG9g.Gjn/jzPPDh0sUxMcf2OyILulzPFrWoi"; 
     const ACCESS_KEY = "$2a$10$ag8oztyaiCZ0sbItUNyZC.ZttjN7p1zmuJMDkX3tT9C/5dGSsLT2G"; 
@@ -533,6 +532,11 @@
                 }
                 if(record.startDate) document.getElementById('startDateInput').value = record.startDate;
                 if(record.gapDays) document.getElementById('intervalInput').value = record.gapDays;
+
+                // 🌟 घंटे लोड करने का अपडेटेड कोड:
+                if(record.totalPoolHours !== undefined) document.getElementById('totalPoolHours').value = record.totalPoolHours;
+                if(record.hoursToDistribute !== undefined) document.getElementById('hoursToDistribute').value = record.hoursToDistribute;
+                if(record.startTime !== undefined) document.getElementById('startTime').value = record.startTime;
             }
         } catch(e) {
             console.error("Error loading cloud data:", e);
@@ -551,6 +555,7 @@
         saveBtnMain.disabled = true;
         floatBtn.disabled = true;
 
+        // 🌟 घंटे सेव करने का अपडेटेड ऑब्जेक्ट:
         let payload = {
             users: initialData,
             password: adminPassword,
@@ -558,7 +563,10 @@
             isTablePublic: isTablePublic,
             selectedMode: selectedMode,
             startDate: document.getElementById('startDateInput').value,
-            gapDays: document.getElementById('intervalInput').value
+            gapDays: document.getElementById('intervalInput').value,
+            totalPoolHours: document.getElementById('totalPoolHours').value,
+            hoursToDistribute: document.getElementById('hoursToDistribute').value,
+            startTime: document.getElementById('startTime').value
         };
 
         try {
