@@ -6,7 +6,7 @@
     <title>सिंचाई समय सारणी (Irrigation Schedule)</title>
     <style>
         * { box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
-        body { background-color: #f4f7f6; margin: 0; padding: 10px; color: #333; padding-bottom: 80px; }
+        body { background-color: #f4f7f6; margin: 0; padding: 10px; color: #333; padding-bottom: 100px; }
         .container { max-width: 1200px; margin: 0 auto; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         
         .header-bar {
@@ -53,6 +53,38 @@
         .notice-card h3 { color: #b7950b; border-color: #f9e79f; }
         .notice-content { font-size: 13px; line-height: 1.5; color: #7d6608; white-space: pre-wrap; background: #fff; padding: 8px; border-radius: 4px; border: 1px dashed #f1c40f; min-height: 80px; }
         .notice-textarea { width: 100%; height: 80px; padding: 6px; font-size: 12px; border: 1px solid #f39c12; border-radius: 4px; resize: vertical; }
+
+        /* 🌟 नया स्टाइलिश बॉटम बॉक्स स्टाइल 🌟 */
+        .bottom-notice-card {
+            margin-top: 20px;
+            background: linear-gradient(135deg, #ffffff 0%, #f0f7ff 100%);
+            border: 2px solid #3498db;
+            border-radius: 12px;
+            padding: 16px;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.15);
+            position: relative;
+        }
+        .bottom-notice-card h3 {
+            margin-top: 0;
+            color: #1b4f72;
+            font-size: 16px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .bottom-notice-content {
+            font-size: 13.5px;
+            line-height: 1.6;
+            color: #2c3e50;
+            white-space: pre-wrap;
+            background: #ffffff;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #aed6f1;
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.05);
+        }
 
         .result-box { margin-top: 10px; padding: 12px; background: #ffffff; border: 2px solid #27ae60; border-radius: 6px; font-size: 13px; line-height: 1.6; }
         .due-msg { margin-top: 8px; padding-top: 6px; border-top: 1px dashed #e74c3c; color: #c0392b; font-weight: bold; }
@@ -296,6 +328,10 @@
             </div>
 
             <button class="btn-action" id="toggleTableVisibilityBtn" style="background:#e74c3c; margin-bottom:5px;" onclick="toggleTableVisibility()">🔒 मेन सारणी (Table) पब्लिक रखें: बंद</button>
+            
+            <!-- 🌟 बॉटम बॉक्स टॉगल बटन (Admin Only) 🌟 -->
+            <button class="btn-action" id="toggleBottomNoticeBtn" style="background:#e74c3c; margin-bottom:5px;" onclick="toggleBottomNoticeVisibility()">🔒 बॉटम संदेश बॉक्स (Public): बंद</button>
+
             <button class="btn-action" style="background:#e67e22; margin-bottom:5px;" onclick="reverseArrayData()">🔄 पूरी सारणी का क्रम उल्टा करें</button>
             <button class="btn-action" style="background:#27ae60;" id="saveBtnMain" onclick="saveDataToCloud()">☁️ ऑनलाइन क्लाउड पर सेव करें</button>
             <button class="btn-action" style="background:#8e44ad;" onclick="openChangePassModal()">🔑 पासवर्ड बदलें</button>
@@ -336,6 +372,18 @@
             </tfoot>
         </table>
     </div>
+
+    <!-- 🌟 नया बॉटम संदेश बॉक्स 🌟 -->
+    <div class="bottom-notice-card" id="bottomNoticeCardWrapper" style="display: none;">
+        <h3>📌 आवश्यक सूचना एवं निर्देश</h3>
+        <div id="bottomNoticeDisplay" class="bottom-notice-content">यहाँ महत्वपूर्ण सूचना प्रदर्शित होगी।</div>
+        
+        <div class="admin-only-block" style="margin-top: 10px;">
+            <label style="font-size:11px; font-weight:bold; display:block; margin-bottom:4px; color:#1b4f72;">⚙️ एडमिन बॉटम संदेश एडिट करें (Bottom Notice Edit):</label>
+            <textarea id="bottomNoticeInput" class="notice-textarea" style="border-color:#3498db;" placeholder="यहाँ पेज के सबसे नीचे दिखाने वाली सूचना लिखें..." oninput="updateBottomNoticeText(this.value)"></textarea>
+        </div>
+    </div>
+
 </div>
 
 <div id="printableArea"></div>
@@ -379,7 +427,9 @@
     let isAdmin = false;
     let adminPassword = "2050"; 
     let noticeMessage = "";
+    let bottomNoticeMessage = ""; 
     let isTablePublic = false; 
+    let isBottomNoticePublic = false; 
     let selectedMode = "straight"; 
     let waterDates = [];
     let debounceTimer;
@@ -422,8 +472,20 @@
         document.getElementById('noticeDisplay').innerText = val.trim() !== "" ? val : "कोई विशेष सूचना उपलब्ध नहीं है।";
     }
 
+    /* 🌟 नया बॉटम नोटिस अपडेट फ़ंक्शन 🌟 */
+    function updateBottomNoticeText(val) {
+        bottomNoticeMessage = val;
+        document.getElementById('bottomNoticeDisplay').innerText = val.trim() !== "" ? val : "यहाँ महत्वपूर्ण सूचना प्रदर्शित होगी।";
+    }
+
     function toggleTableVisibility() {
         isTablePublic = !isTablePublic;
+        renderTable();
+    }
+
+    /* 🌟 बॉटम नोटिस विजिबिलिटी टॉगल फ़ंक्शन 🌟 */
+    function toggleBottomNoticeVisibility() {
+        isBottomNoticePublic = !isBottomNoticePublic;
         renderTable();
     }
 
@@ -524,7 +586,13 @@
                     document.getElementById('noticeInput').value = noticeMessage;
                     updateNoticeText(noticeMessage);
                 }
+                if(record.bottomNotice) {
+                    bottomNoticeMessage = record.bottomNotice;
+                    document.getElementById('bottomNoticeInput').value = bottomNoticeMessage;
+                    updateBottomNoticeText(bottomNoticeMessage);
+                }
                 if(record.isTablePublic !== undefined) isTablePublic = record.isTablePublic;
+                if(record.isBottomNoticePublic !== undefined) isBottomNoticePublic = record.isBottomNoticePublic;
                 if(record.selectedMode) {
                     selectedMode = record.selectedMode;
                     let radios = document.getElementsByName('waterDistributionMode');
@@ -533,7 +601,6 @@
                 if(record.startDate) document.getElementById('startDateInput').value = record.startDate;
                 if(record.gapDays) document.getElementById('intervalInput').value = record.gapDays;
 
-                // 🌟 घंटे लोड करने का अपडेटेड कोड:
                 if(record.totalPoolHours !== undefined) document.getElementById('totalPoolHours').value = record.totalPoolHours;
                 if(record.hoursToDistribute !== undefined) document.getElementById('hoursToDistribute').value = record.hoursToDistribute;
                 if(record.startTime !== undefined) document.getElementById('startTime').value = record.startTime;
@@ -555,12 +622,13 @@
         saveBtnMain.disabled = true;
         floatBtn.disabled = true;
 
-        // 🌟 घंटे सेव करने का अपडेटेड ऑब्जेक्ट:
         let payload = {
             users: initialData,
             password: adminPassword,
             notice: noticeMessage,
+            bottomNotice: bottomNoticeMessage,
             isTablePublic: isTablePublic,
+            isBottomNoticePublic: isBottomNoticePublic,
             selectedMode: selectedMode,
             startDate: document.getElementById('startDateInput').value,
             gapDays: document.getElementById('intervalInput').value,
@@ -650,6 +718,10 @@
         const showTable = isAdmin || isTablePublic;
         document.getElementById('tableWrapper').style.display = showTable ? 'block' : 'none';
 
+        /* 🌟 नया बॉटम बॉक्स डिस्प्ले कंट्रोल 🌟 */
+        const showBottomNotice = isAdmin || isBottomNoticePublic;
+        document.getElementById('bottomNoticeCardWrapper').style.display = showBottomNotice ? 'block' : 'none';
+
         document.getElementById('actionHeader').style.display = isAdmin ? 'table-cell' : 'none';
         document.getElementById('floatingSaveBtn').style.display = isAdmin ? 'block' : 'none';
         document.getElementById('editToggleBtn').innerText = isAdmin ? "🔓 Admin Active" : "🔐 Admin Edit";
@@ -658,6 +730,13 @@
         if(tableToggleBtn) {
             tableToggleBtn.innerText = isTablePublic ? "👁️ मेन सारणी (Table) पब्लिक रखें: चालू" : "🔒 मेन सारणी (Table) पब्लिक रखें: बंद";
             tableToggleBtn.style.background = isTablePublic ? "#3498db" : "#e74c3c";
+        }
+
+        /* 🌟 बॉटम नोटिस टॉगल बटन अपडेट 🌟 */
+        let bottomNoticeToggleBtn = document.getElementById('toggleBottomNoticeBtn');
+        if(bottomNoticeToggleBtn) {
+            bottomNoticeToggleBtn.innerText = isBottomNoticePublic ? "👁️ बॉटम संदेश बॉक्स (Public): चालू" : "🔒 बॉटम संदेश बॉक्स (Public): बंद";
+            bottomNoticeToggleBtn.style.background = isBottomNoticePublic ? "#3498db" : "#e74c3c";
         }
 
         document.querySelectorAll('.admin-only-block').forEach(el => {
