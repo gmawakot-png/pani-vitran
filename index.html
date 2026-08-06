@@ -464,6 +464,13 @@
     let waterDates = [];
     let debounceTimer;
 
+    // मोड़-वार अलग समय और सरणी डेटा स्टोर करने के लिए ऑब्जेक्ट
+    let modeDataStore = {
+        straight: { totalPoolHours: "24", hoursToDistribute: "24", userMinutes: [] },
+        oddeven: { totalPoolHours: "24", hoursToDistribute: "24", userMinutes: [] },
+        samedayoddeven: { totalPoolHours: "24", hoursToDistribute: "24", userMinutes: [] }
+    };
+
     let initialData = [
         { name: "श्री जितेन्द्र सिंह नेगी", bigha: 7, amount: "", date: "", oddMinutes: 0, evenMinutes: 0 },
         { name: "श्री उत्तम सिंह बिष्ट", bigha: 5, amount: "", date: "", oddMinutes: 0, evenMinutes: 0 },
@@ -505,7 +512,10 @@
 
     function debouncedCalculate() {
         clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(() => { updateCalculatedValuesOnly(); }, 300);
+        debounceTimer = setTimeout(() => { 
+            saveCurrentModeState();
+            updateCalculatedValuesOnly(); 
+        }, 300);
     }
 
     function setSaveStatus(message, isBusy) {
@@ -517,6 +527,7 @@
 
     function markDataDirty() {
         isUserEditingLocally = true;
+        saveCurrentModeState();
         if (isAdmin) {
             saveDataToCloud();
         } else {
@@ -563,8 +574,47 @@
         markDataDirty();
     }
 
+    // --- मोड्स डेटा स्विचिंग फ़ंक्शंस ---
+    function saveCurrentModeState() {
+        if (!selectedMode) return;
+        let poolH = document.getElementById('totalPoolHours') ? document.getElementById('totalPoolHours').value : "24";
+        let distH = document.getElementById('hoursToDistribute') ? document.getElementById('hoursToDistribute').value : "24";
+        
+        let userMins = initialData.map(u => ({
+            oddMinutes: u.oddMinutes !== undefined ? u.oddMinutes : 0,
+            evenMinutes: u.evenMinutes !== undefined ? u.evenMinutes : 0
+        }));
+
+        modeDataStore[selectedMode] = {
+            totalPoolHours: poolH,
+            hoursToDistribute: distH,
+            userMinutes: userMins
+        };
+    }
+
+    function loadModeState(mode) {
+        if (!modeDataStore[mode]) {
+            modeDataStore[mode] = { totalPoolHours: "24", hoursToDistribute: "24", userMinutes: [] };
+        }
+
+        let store = modeDataStore[mode];
+        if (document.getElementById('totalPoolHours')) document.getElementById('totalPoolHours').value = store.totalPoolHours || "24";
+        if (document.getElementById('hoursToDistribute')) document.getElementById('hoursToDistribute').value = store.hoursToDistribute || "24";
+
+        if (store.userMinutes && store.userMinutes.length > 0) {
+            initialData.forEach((u, idx) => {
+                if (store.userMinutes[idx] !== undefined) {
+                    u.oddMinutes = store.userMinutes[idx].oddMinutes !== undefined ? store.userMinutes[idx].oddMinutes : 0;
+                    u.evenMinutes = store.userMinutes[idx].evenMinutes !== undefined ? store.userMinutes[idx].evenMinutes : 0;
+                }
+            });
+        }
+    }
+
     function handleModeChange(val) {
-        selectedMode = val;
+        saveCurrentModeState(); // वर्तमान मोड डेटा सेव करें
+        selectedMode = val;     // नया मोड सेट करें
+        loadModeState(selectedMode); // नए मोड का पुराना सेट डेटा लोड करें
         renderTable();
         populateUserDropdown();
         markDataDirty();
@@ -655,7 +705,7 @@
                 localStorage.setItem('ADMIN_PASS', newP);
                 closeChangePassModal();
                 alert("✅ नया पासवर्ड लागू हो गया है!");
-                markDataDirty();
+                saveDataToCloud(); // तुरंत क्लाउड में भी पासवर्ड सेव करें
             } else {
                 alert("कृपया नया पासवर्ड दर्ज करें!");
             }
@@ -666,6 +716,16 @@
 
     function applyLoadedRecord(record) {
         if(!record) return;
+
+        // पासवर्ड सिंक करें
+        if (record.password) {
+            adminPassword = String(record.password);
+            localStorage.setItem('ADMIN_PASS', adminPassword);
+        } else {
+            let savedPass = localStorage.getItem('ADMIN_PASS');
+            if (savedPass) adminPassword = savedPass;
+        }
+
         if(record.users && record.users.length > 0) {
             let loadedUsers = record.users.map(u => ({
                 ...u,
@@ -674,12 +734,9 @@
             }));
             initialData = normalizeDataOrder(loadedUsers);
         }
-        
-        let savedPass = localStorage.getItem('ADMIN_PASS');
-        if (savedPass) {
-            adminPassword = savedPass;
-        } else if(record.password) {
-            adminPassword = String(record.password);
+
+        if(record.modeDataStore) {
+            modeDataStore = record.modeDataStore;
         }
 
         if(record.notice) {
@@ -700,10 +757,11 @@
             let radios = document.getElementsByName('waterDistributionMode');
             radios.forEach(r => { if(r.value === selectedMode) r.checked = true; });
         }
+
+        loadModeState(selectedMode);
+
         if(record.startDate && document.getElementById('startDateInput')) document.getElementById('startDateInput').value = record.startDate;
         if(record.gapDays && document.getElementById('intervalInput')) document.getElementById('intervalInput').value = record.gapDays;
-        if(record.totalPoolHours !== undefined && document.getElementById('totalPoolHours')) document.getElementById('totalPoolHours').value = record.totalPoolHours;
-        if(record.hoursToDistribute !== undefined && document.getElementById('hoursToDistribute')) document.getElementById('hoursToDistribute').value = record.hoursToDistribute;
         if(record.startTime !== undefined && document.getElementById('startTime')) document.getElementById('startTime').value = record.startTime;
     }
 
@@ -746,6 +804,8 @@
             return;
         }
 
+        saveCurrentModeState();
+
         let activePass = localStorage.getItem('ADMIN_PASS') || String(adminPassword);
 
         let payload = {
@@ -756,6 +816,7 @@
             isBottomNoticePublic: isBottomNoticePublic,
             isTableReversed: isTableReversed,
             selectedMode: selectedMode,
+            modeDataStore: modeDataStore,
             startDate: document.getElementById('startDateInput') ? document.getElementById('startDateInput').value : "",
             gapDays: document.getElementById('intervalInput') ? document.getElementById('intervalInput').value : "4",
             totalPoolHours: document.getElementById('totalPoolHours') ? document.getElementById('totalPoolHours').value : "24",
@@ -824,8 +885,6 @@
         document.getElementById('turnResult').style.display = 'none';
         document.getElementById('printSlipBtn').style.display = 'none';
     }
-
-    // --- समय गणना की विशेष फ़ंक्शन (निरंतरता व ज़ीरो टाइम लॉस फिक्स) ---
 
     function getShiftTotalMinutes(isReverseOrder, shiftHours, isOddType) {
         let totalBigha = initialData.reduce((acc, curr) => acc + (parseFloat(curr.bigha) || 0), 0);
@@ -1274,14 +1333,12 @@
             let primaryIsRev = isTableReversed;
             let secondaryIsRev = !isTableReversed;
 
-            // ग्रुप A की 1st बारी का कुल समय
             let group1Mins = getShiftTotalMinutes(primaryIsRev, halfH, !primaryIsRev);
             let midTimeStrGroupA = addMinutesToTime(startStr, group1Mins);
 
             let slot1_Shift1 = getTurnSlotCustom(user, primaryIsRev, halfH, startStr, !primaryIsRev);
             let slot1_Shift2 = getTurnSlotCustom(user, secondaryIsRev, halfH, midTimeStrGroupA, primaryIsRev);
 
-            // ग्रुप B की 1st बारी का कुल समय
             let group2Mins = getShiftTotalMinutes(secondaryIsRev, halfH, primaryIsRev);
             let midTimeStrGroupB = addMinutesToTime(startStr, group2Mins);
 
@@ -1357,14 +1414,12 @@
             let primaryIsRev = isTableReversed;
             let secondaryIsRev = !isTableReversed;
 
-            // समूह A की 1st बारी का कुल समय निकाल कर 2nd बारी को उससे जोड़ा गया है (0 टाइम लॉस)
             let group1Mins = getShiftTotalMinutes(primaryIsRev, halfH, !primaryIsRev);
             let midTimeStrGroupA = addMinutesToTime(startStr, group1Mins);
 
             let slot1_Shift1 = getTurnSlotCustom(user, primaryIsRev, halfH, startStr, !primaryIsRev);
             let slot1_Shift2 = getTurnSlotCustom(user, secondaryIsRev, halfH, midTimeStrGroupA, primaryIsRev);
 
-            // समूह B की 1st बारी का कुल समय
             let group2Mins = getShiftTotalMinutes(secondaryIsRev, halfH, primaryIsRev);
             let midTimeStrGroupB = addMinutesToTime(startStr, group2Mins);
 
