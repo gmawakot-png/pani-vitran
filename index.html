@@ -38,8 +38,8 @@
         
         .mode-card { background: #fef3c7; border-color: #f59e0b; margin-bottom: 12px; }
         .mode-card h3 { color: #92400e; border-bottom: 1px solid #f59e0b; margin-top: 0; font-size: 15px; padding-bottom: 5px; }
-        .mode-options { display: flex; gap: 15px; margin-top: 8px; flex-wrap: wrap; }
-        .mode-options label { font-weight: bold; font-size: 13px; cursor: pointer; display: flex; align-items: center; gap: 5px; color: #78350f; }
+        .mode-options { display: flex; gap: 12px; margin-top: 8px; flex-wrap: wrap; }
+        .mode-options label { font-weight: bold; font-size: 12.5px; cursor: pointer; display: flex; align-items: center; gap: 4px; color: #78350f; background: #fff3cd; padding: 4px 8px; border-radius: 4px; border: 1px solid #f59e0b; }
 
         .controls-card h3, .summary-card h3, .search-card h3, .notice-card h3 { margin-top: 0; color: #0c5460; font-size: 15px; border-bottom: 1px solid #b8daff; padding-bottom: 5px; }
         .input-group { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; gap: 8px; }
@@ -196,8 +196,8 @@
         #printableArea { display: none; }
 
         .slip-box {
-            width: 100%; padding: 3px 5px; border: 1px dashed #444; font-family: Arial, sans-serif;
-            background: #fff; box-sizing: border-box; border-radius: 3px; color: #111; font-size: 7.5px; line-height: 1.15;
+            width: 100%; padding: 4px 6px; border: 1px dashed #444; font-family: Arial, sans-serif;
+            background: #fff; box-sizing: border-box; border-radius: 3px; color: #111; font-size: 7.5px; line-height: 1.2;
             page-break-inside: avoid !important; break-inside: avoid !important;
         }
         .slip-header-title {
@@ -209,6 +209,7 @@
         .slip-field b { color: #000; }
         .slip-time-txt { color: #1a5276; font-weight: bold; }
         .slip-even-time { color: #c0392b; font-weight: bold; }
+        .slip-dates-list { color: #1e8449; font-weight: bold; font-size: 7px; word-break: break-all; }
         .slip-divider { border-top: 1px dashed #888; margin: 2px 0; }
         .slip-footer-txt {
             margin-top: 2px; text-align: center; font-size: 7px; border-top: 1px solid #ccc; padding-top: 1px; color: #555; font-weight: bold;
@@ -235,6 +236,7 @@
             #printableArea.single-slip-mode .slip-header-title { font-size: 15px !important; }
             #printableArea.single-slip-mode .slip-section-title { font-size: 13px !important; }
             #printableArea.single-slip-mode .slip-field { font-size: 11.5px !important; }
+            #printableArea.single-slip-mode .slip-dates-list { font-size: 11px !important; }
         }
     </style>
 </head>
@@ -242,7 +244,7 @@
 
 <div class="container">
     <div class="header-bar">
-        <h2>ग्रुप नं 2 में 12 घंटे पानी सिंचाई वितरण सारणी</h2>
+        <h2>ग्रुप नं 2 में पानी सिंचाई वितरण सारणी</h2>
         <div style="display: flex; align-items: center; gap: 10px;">
             <div class="live-clock-box">
                 🌐 <span id="liveClock">00:00:00 AM</span>
@@ -250,7 +252,7 @@
         </div>
     </div>
 
-    <div class="top-section" style="margin-top: 15px;">
+    <div class="top-section" style="margin-top: 10px;">
         <div class="search-card">
             <h3>💧 पानी की अगली बारी की जानकारी</h3>
 
@@ -261,17 +263,17 @@
                 </select>
             </div>
 
-            <div class="admin-date-controls admin-only-block" id="directAdminDateBox">
-                <b style="color:#1e8449; font-size:12px;">⚙️ वर्तमान तारीख व दिन का अंतर (गैप) बदलें:</b>
+            <div class="admin-date-controls" id="directAdminDateBox" style="background:#eef9f2; border:1px solid #a3e4d7;">
+                <b style="color:#1e8449; font-size:12px;">🗓️ तारीख व दिन का गैप बदलें (प्रिंट हेतु):</b>
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-top:6px; gap:8px;">
                     <div>
-                        <span style="font-size:11px; font-weight:bold; display:block;">वर्तमान तारीख चुनें:</span>
+                        <span style="font-size:11px; font-weight:bold; display:block;">वर्तमान तारीख:</span>
                         <input type="date" id="startDateInput" style="width:130px; padding:4px; font-size:12px; border:1px solid #27ae60; border-radius:4px; font-weight:bold;" oninput="generate30DaysCalendar(); markDataDirty();">
                     </div>
                     <div>
                         <span style="font-size:11px; font-weight:bold; display:block;">दिन का गैप:</span>
                         <div class="interval-box-container">
-                            <input type="text" inputmode="numeric" pattern="[0-9]*" id="intervalInput" value="1" oninput="generate30DaysCalendar(); markDataDirty();">
+                            <input type="text" inputmode="numeric" pattern="[0-9]*" id="intervalInput" value="4" oninput="generate30DaysCalendar(); markDataDirty();">
                             <div class="interval-arrows-btn">
                                 <button type="button" onclick="adjustInterval(1)">▲</button>
                                 <button type="button" onclick="adjustInterval(-1)">▼</button>
@@ -323,8 +325,12 @@
                         <b>1. लगातार (Straight)</b>
                     </label>
                     <label>
-                        <input type="radio" name="waterDistributionMode" value="oddeven" checked onchange="handleModeChange(this.value)"> 
+                        <input type="radio" name="waterDistributionMode" value="oddeven" onchange="handleModeChange(this.value)"> 
                         <b>2. औड-इवन (Odd-Even)</b>
+                    </label>
+                    <label>
+                        <input type="radio" name="waterDistributionMode" value="samedayoddeven" checked onchange="handleModeChange(this.value)"> 
+                        <b>3. Same-Day औड-इवन (Odd-Even)</b>
                     </label>
                 </div>
             </div>
@@ -335,24 +341,25 @@
             </div>
             <div class="input-group">
                 <label for="hoursToDistribute">कुल घंटे बाँटने हैं:</label>
-                <input type="text" id="hoursToDistribute" value="23" inputmode="decimal" pattern="[0-9.]*" oninput="debouncedCalculate(); markDataDirty();">
+                <input type="text" id="hoursToDistribute" value="24" inputmode="decimal" pattern="[0-9.]*" oninput="debouncedCalculate(); markDataDirty();">
             </div>
             <div class="input-group">
                 <label for="startTime">शुरुआती समय (Start):</label>
                 <input type="text" id="startTime" value="07:00:00 AM" oninput="debouncedCalculate(); markDataDirty();">
             </div>
 
-            <button class="btn-action" id="toggleTableVisibilityBtn" style="background:#e74c3c; margin-top:8px; margin-bottom:5px;" onclick="toggleTableVisibility()">🔒 मेन सारणी (Table) पब्लिक रखें: बंद</button>
+            <button class="btn-action" id="toggleTableVisibilityBtn" style="background:#e74c3c; margin-top:8px; margin-bottom:5px;" onclick="toggleTableVisibility()">🔓 पूरी वेबसाइट पब्लिक रखें: चालू</button>
             <button class="btn-action" id="toggleBottomNoticeBtn" style="background:#27ae60; margin-bottom:5px;" onclick="toggleBottomNoticeVisibility()">🔓 बॉटम संदेश बॉक्स (Public): चालू</button>
             <button class="btn-action" id="toggleReverseTableBtn" style="background:#d35400; margin-bottom:5px;" onclick="toggleReverseTable()">🔄 उल्टी बारी लागू करें</button>
+            
             <button class="btn-action" style="background:#27ae60;" id="saveBtnMain" onclick="saveDataToCloud()">☁️ क्लाउड में सेव करें</button>
-            <button class="btn-action" style="background:#8e44ad;" onclick="openChangePassModal()">🔑 पासवर्ड बदलें</button>
+            <button class="btn-action" style="background:#8e44ad;" id="changePassBtnAdmin" onclick="openChangePassModal()">🔑 पासवर्ड बदलें</button>
             
             <button class="btn-print-all" onclick="printAllSlips()">🖨️ पूरे महीने की सभी पर्चियां प्रिंट करें (18 प्रति पेज)</button>
         </div>
     </div>
 
-    <div style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+    <div style="margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; flex-wrap:wrap; gap:10px;">
         <input type="text" id="tableSearchInput" placeholder="🔎 सारणी में नाम खोजें..." onkeyup="filterTableByName()" style="padding: 6px 10px; width: 220px; font-size: 13px; border: 1px solid #bdc3c7; border-radius: 4px;">
         <div id="activeModeIndicator" style="font-weight: bold; font-size: 13px; color: #1a5276; background: #e8f8f5; padding: 4px 10px; border-radius: 4px; border: 1px solid #a3e4d7;">
             सक्रिय बारी: सुल्टी बारी (Odd)
@@ -442,18 +449,18 @@
 </div>
 
 <script>
-    // JSONBin Configuration
     const BIN_ID = "6a71c6b0f5f4af5e29e95451";
     const MASTER_KEY = "$2a$10$JcvEWN7NJzepZ2xuDKG9g.Gjn/jzPPDh0sUxMcf2OyILulzPFrWoi";
 
     let isAdmin = false;
+    let isUserEditingLocally = false;
     let adminPassword = "2050"; 
     let noticeMessage = "";
     let bottomNoticeMessage = ""; 
-    let isTablePublic = false; 
+    let isTablePublic = true;  
     let isBottomNoticePublic = true; 
     let isTableReversed = false; 
-    let selectedMode = "oddeven"; 
+    let selectedMode = "samedayoddeven"; 
     let waterDates = [];
     let debounceTimer;
 
@@ -509,7 +516,12 @@
     }
 
     function markDataDirty() {
-        saveDataToCloud();
+        isUserEditingLocally = true;
+        if (isAdmin) {
+            saveDataToCloud();
+        } else {
+            updateCalculatedValuesOnly();
+        }
     }
 
     function adjustInterval(delta) {
@@ -580,7 +592,7 @@
     function openAdminModal() {
         if(isAdmin) {
             isAdmin = false;
-            alert("व्यू मोड चालू। (एडमिन एडिट बंद)");
+            alert("व्यू/प्रैक्टिस मोड चालू। (एडमिन एडिट बंद)");
             renderTable();
         } else {
             let passInput = document.getElementById('adminPassInput');
@@ -604,7 +616,7 @@
         if(pass === activePass) {
             isAdmin = true;
             closeAdminModal();
-            alert("एडमिन मोड चालू हो गया है!");
+            alert("🔑 एडमिन मोड चालू हो गया है! अब आप जो बदलेंगे वह क्लाउड में स्थायी सेव होगा।");
             renderTable();
         } else {
             alert("गलत पासवर्ड!");
@@ -612,6 +624,10 @@
     }
 
     function openChangePassModal() {
+        if (!isAdmin) {
+            alert("🔒 केवल एडमिन ही पासवर्ड बदल सकते हैं!");
+            return;
+        }
         let oldIn = document.getElementById('oldPassInput');
         let newIn = document.getElementById('newPassInput');
         if(oldIn) oldIn.value = '';
@@ -626,6 +642,7 @@
     }
 
     function submitNewPassword() {
+        if (!isAdmin) return;
         let oldIn = document.getElementById('oldPassInput');
         let newIn = document.getElementById('newPassInput');
         let oldP = oldIn ? oldIn.value.trim() : '';
@@ -637,7 +654,7 @@
                 adminPassword = newP;
                 localStorage.setItem('ADMIN_PASS', newP);
                 closeChangePassModal();
-                alert("✅ नया पासवर्ड लागू हो गया है! पुराना पासवर्ड अब काम नहीं करेगा।");
+                alert("✅ नया पासवर्ड लागू हो गया है!");
                 markDataDirty();
             } else {
                 alert("कृपया नया पासवर्ड दर्ज करें!");
@@ -691,12 +708,12 @@
     }
 
     async function loadDataFromCloud() {
+        if (isUserEditingLocally && !isAdmin) return;
+
         try {
             let res = await fetch(`https://api.jsonbin.io/v3/b/${BIN_ID}/latest`, { 
                 method: 'GET',
-                headers: {
-                    'X-Master-Key': MASTER_KEY
-                },
+                headers: { 'X-Master-Key': MASTER_KEY },
                 cache: 'no-store'
             });
 
@@ -723,6 +740,12 @@
     }
 
     async function saveDataToCloud() {
+        if (!isAdmin) {
+            setSaveStatus('🔒 केवल एडमिन ही क्लाउड में सेव कर सकते हैं', false);
+            setTimeout(() => { setSaveStatus('💾 क्लाउड पर सेव करें', false); }, 2000);
+            return;
+        }
+
         let activePass = localStorage.getItem('ADMIN_PASS') || String(adminPassword);
 
         let payload = {
@@ -734,9 +757,9 @@
             isTableReversed: isTableReversed,
             selectedMode: selectedMode,
             startDate: document.getElementById('startDateInput') ? document.getElementById('startDateInput').value : "",
-            gapDays: document.getElementById('intervalInput') ? document.getElementById('intervalInput').value : "1",
+            gapDays: document.getElementById('intervalInput') ? document.getElementById('intervalInput').value : "4",
             totalPoolHours: document.getElementById('totalPoolHours') ? document.getElementById('totalPoolHours').value : "24",
-            hoursToDistribute: document.getElementById('hoursToDistribute') ? document.getElementById('hoursToDistribute').value : "23",
+            hoursToDistribute: document.getElementById('hoursToDistribute') ? document.getElementById('hoursToDistribute').value : "24",
             startTime: document.getElementById('startTime') ? document.getElementById('startTime').value : "07:00:00 AM",
             users: initialData
         };
@@ -769,10 +792,10 @@
     }
 
     setInterval(() => {
-        if (!isAdmin) {
+        if (!isAdmin && !isUserEditingLocally) {
             loadDataFromCloud();
         }
-    }, 3000);
+    }, 4000);
 
     function calculateAll() {
         renderTable();
@@ -802,84 +825,36 @@
         document.getElementById('printSlipBtn').style.display = 'none';
     }
 
-    function getStraightSlot(userObj) {
+    // --- समय गणना की विशेष फ़ंक्शन (निरंतरता व ज़ीरो टाइम लॉस फिक्स) ---
+
+    function getShiftTotalMinutes(isReverseOrder, shiftHours, isOddType) {
         let totalBigha = initialData.reduce((acc, curr) => acc + (parseFloat(curr.bigha) || 0), 0);
-        let hoursToDistribute = parseFloat(document.getElementById('hoursToDistribute').value) || 23;
-        let targetTotalMinutes = hoursToDistribute * 60;
-        let startStr = document.getElementById('startTime').value.trim();
-
-        let list = isTableReversed ? [...initialData].reverse() : [...initialData];
-        let beforeMinutes = 0;
-        let userMinutes = 0;
-
-        for (let row of list) {
-            let bigha = parseFloat(row.bigha) || 0;
-            let pureMins = (totalBigha > 0) ? (bigha * targetTotalMinutes / totalBigha) : 0;
-            let extraMins = isTableReversed ? (parseFloat(row.evenMinutes) || 0) : (parseFloat(row.oddMinutes) || 0);
-            let totalMins = pureMins + extraMins;
-
-            if (row === userObj || row.name === userObj.name) {
-                userMinutes = totalMins;
-                break;
-            } else {
-                beforeMinutes += totalMins;
-            }
-        }
-
-        return {
-            start: addMinutesToTime(startStr, beforeMinutes),
-            end: addMinutesToTime(startStr, beforeMinutes + userMinutes),
-            minutes: userMinutes
-        };
-    }
-
-    function getTurn1Slot(userObj) {
-        let totalBigha = initialData.reduce((acc, curr) => acc + (parseFloat(curr.bigha) || 0), 0);
-        let hoursToDistribute = parseFloat(document.getElementById('hoursToDistribute').value) || 23;
-        let targetTotalMinutes = hoursToDistribute * 60;
-        let startStr = document.getElementById('startTime').value.trim();
-
-        let beforeMinutes = 0;
-        let userMinutes = 0;
-
+        let targetTotalMinutes = shiftHours * 60;
+        let totalGroupMins = 0;
         for (let row of initialData) {
             let bigha = parseFloat(row.bigha) || 0;
             let pureMins = (totalBigha > 0) ? (bigha * targetTotalMinutes / totalBigha) : 0;
-            let extraMins = parseFloat(row.oddMinutes) || 0; 
-            let totalMins = pureMins + extraMins;
-
-            if (row === userObj || row.name === userObj.name) {
-                userMinutes = totalMins;
-                break;
-            } else {
-                beforeMinutes += totalMins;
-            }
+            let extraMins = isOddType ? (parseFloat(row.oddMinutes) || 0) : (parseFloat(row.evenMinutes) || 0);
+            totalGroupMins += (pureMins + extraMins);
         }
-
-        return {
-            start: addMinutesToTime(startStr, beforeMinutes),
-            end: addMinutesToTime(startStr, beforeMinutes + userMinutes),
-            minutes: userMinutes
-        };
+        return totalGroupMins;
     }
 
-    function getTurn2Slot(userObj) {
+    function getTurnSlotCustom(userObj, isReverseOrder, shiftHours, startStr, isOddType) {
         let totalBigha = initialData.reduce((acc, curr) => acc + (parseFloat(curr.bigha) || 0), 0);
-        let hoursToDistribute = parseFloat(document.getElementById('hoursToDistribute').value) || 23;
-        let targetTotalMinutes = hoursToDistribute * 60;
-        let startStr = document.getElementById('startTime').value.trim();
+        let targetTotalMinutes = shiftHours * 60;
 
-        let list = [...initialData].reverse();
+        let list = isReverseOrder ? [...initialData].reverse() : [...initialData];
         let beforeMinutes = 0;
         let userMinutes = 0;
 
         for (let row of list) {
             let bigha = parseFloat(row.bigha) || 0;
             let pureMins = (totalBigha > 0) ? (bigha * targetTotalMinutes / totalBigha) : 0;
-            let extraMins = parseFloat(row.evenMinutes) || 0; 
+            let extraMins = isOddType ? (parseFloat(row.oddMinutes) || 0) : (parseFloat(row.evenMinutes) || 0);
             let totalMins = pureMins + extraMins;
 
-            if (row === userObj || row.name === userObj.name) {
+            if (row.name.trim() === userObj.name.trim()) {
                 userMinutes = totalMins;
                 break;
             } else {
@@ -907,8 +882,9 @@
             totalEvenSum += parseFloat(row.evenMinutes) || 0;
         });
 
-        let hoursToDistribute = parseFloat(document.getElementById('hoursToDistribute').value) || 23;
-        let targetTotalMinutes = hoursToDistribute * 60;
+        let hoursToDistribute = parseFloat(document.getElementById('hoursToDistribute').value) || 24;
+        let shiftHours = (selectedMode === "samedayoddeven") ? (hoursToDistribute / 2) : hoursToDistribute;
+        let targetTotalMinutes = shiftHours * 60;
         let startStr = document.getElementById('startTime').value.trim();
         let lastEndTimeFormatted = '-';
 
@@ -977,8 +953,9 @@
         document.getElementById('sumBigha').innerText = totalBigha;
         document.getElementById('totalEndFoot').innerText = lastEndTimeFormatted === '-' ? '-' : lastEndTimeFormatted;
 
-        let distH = Math.floor(targetTotalMinutes / 60);
-        let distM = Math.round(targetTotalMinutes % 60);
+        let totalDistMinutesDisplay = (hoursToDistribute * 60);
+        let distH = Math.floor(totalDistMinutesDisplay / 60);
+        let distM = Math.round(totalDistMinutesDisplay % 60);
         document.getElementById('displayDistributedHM').innerText = `${distH} घंटे ${distM} मिनट`;
 
         let activeSumForDisplay = isTableReversed ? totalEvenSum : totalOddSum;
@@ -986,7 +963,7 @@
         let extraM = Math.round(activeSumForDisplay % 60);
         document.getElementById('displayExtraDistributedHM').innerText = (extraH > 0 ? `${extraH} घंटे ` : '') + `${extraM} मिनट`;
 
-        let totalDistributionMinutes = targetTotalMinutes + activeSumForDisplay;
+        let totalDistributionMinutes = totalDistMinutesDisplay + activeSumForDisplay;
         let totalDistH = Math.floor(totalDistributionMinutes / 60);
         let totalDistM = Math.round(totalDistributionMinutes % 60);
         document.getElementById('displayTotalDistributionHM').innerText = `${totalDistH} घंटे ${totalDistM} मिनट`;
@@ -1005,8 +982,9 @@
         tbody.innerHTML = '';
 
         let totalBigha = initialData.reduce((acc, curr) => acc + (parseFloat(curr.bigha) || 0), 0);
-        let hoursToDistribute = parseFloat(document.getElementById('hoursToDistribute').value) || 23;
-        let targetTotalMinutes = hoursToDistribute * 60;
+        let hoursToDistribute = parseFloat(document.getElementById('hoursToDistribute').value) || 24;
+        let shiftHours = (selectedMode === "samedayoddeven") ? (hoursToDistribute / 2) : hoursToDistribute;
+        let targetTotalMinutes = shiftHours * 60;
         let startStr = document.getElementById('startTime').value.trim();
 
         let renderIndices = [...Array(initialData.length).keys()];
@@ -1097,16 +1075,16 @@
 
             tr.innerHTML = `
                 <td>${loopIdx + 1}</td>
-                <td><input type="text" class="clean-input" data-row-idx="${idx}" data-field="name" style="width:130px;" value="${row.name}" oninput="updateRowFieldInline(${idx}, 'name', this.value)" ${!isAdmin ? 'readonly' : ''}></td>
-                <td><input type="text" inputmode="decimal" pattern="[0-9.]*" class="clean-input" data-row-idx="${idx}" data-field="bigha" style="width:50px; text-align:center;" value="${row.bigha}" oninput="updateRowFieldInline(${idx}, 'bigha', this.value);" ${!isAdmin ? 'readonly' : ''}></td>
+                <td><input type="text" class="clean-input" data-row-idx="${idx}" data-field="name" style="width:130px;" value="${row.name}" oninput="updateRowFieldInline(${idx}, 'name', this.value)"></td>
+                <td><input type="text" inputmode="decimal" pattern="[0-9.]*" class="clean-input" data-row-idx="${idx}" data-field="bigha" style="width:50px; text-align:center;" value="${row.bigha}" oninput="updateRowFieldInline(${idx}, 'bigha', this.value);"></td>
                 <td class="red-txt">${Math.round(minutes)}</td>
                 <td class="red-txt">${hoursPart} घंटे ${minsPart} मिनट</td>
                 <td class="${oddClass}">${oddColumnContent}</td>
                 <td class="${evenClass}">${evenColumnContent}</td>
                 <td class="red-txt">${startTimeFormatted}</td>
                 <td class="red-txt">${endTimeFormatted}</td>
-                <td><input type="text" inputmode="numeric" pattern="[0-9]*" class="clean-input" data-row-idx="${idx}" data-field="amount" style="width:60px; text-align:center;" value="${row.amount || ''}" placeholder="0" oninput="updateRowFieldInline(${idx}, 'amount', this.value);" ${!isAdmin ? 'readonly' : ''}></td>
-                <td><input type="text" class="clean-input" data-row-idx="${idx}" data-field="date" style="width:75px; text-align:center;" value="${row.date || ''}" placeholder="DD MM YY" oninput="updateRowFieldInline(${idx}, 'date', this.value)" ${!isAdmin ? 'readonly' : ''}></td>
+                <td><input type="text" inputmode="numeric" pattern="[0-9]*" class="clean-input" data-row-idx="${idx}" data-field="amount" style="width:60px; text-align:center;" value="${row.amount || ''}" placeholder="0" oninput="updateRowFieldInline(${idx}, 'amount', this.value);"></td>
+                <td><input type="text" class="clean-input" data-row-idx="${idx}" data-field="date" style="width:75px; text-align:center;" value="${row.date || ''}" placeholder="DD MM YY" oninput="updateRowFieldInline(${idx}, 'date', this.value)"></td>
                 <td>
                     <button class="btn-row-print" onclick="printRowSlip(${idx})">🖨️ पर्ची</button>
                 </td>
@@ -1123,13 +1101,15 @@
         document.getElementById('actionHeader').style.display = isAdmin ? 'table-cell' : 'none';
         document.getElementById('deleteHeader').style.display = isAdmin ? 'table-cell' : 'none';
         document.getElementById('editToggleBtn').innerText = isAdmin ? "🔒 Admin Close" : "🔐 Admin Edit";
-        document.getElementById('floatingSaveBtn').style.display = isAdmin ? 'block' : 'none';
         
-        document.getElementById('toggleTableVisibilityBtn').innerText = isTablePublic ? "🔓 मेन सारणी (Table) पब्लिक रखें: चालू" : "🔒 मेन सारणी (Table) पब्लिक रखें: बंद";
+        document.getElementById('floatingSaveBtn').style.display = isAdmin ? 'block' : 'none';
+        document.getElementById('saveBtnMain').style.display = isAdmin ? 'block' : 'none';
+        document.getElementById('changePassBtnAdmin').style.display = isAdmin ? 'block' : 'none';
+        
+        document.getElementById('toggleTableVisibilityBtn').innerText = isTablePublic ? "🔓 पूरी वेबसाइट पब्लिक रखें: चालू" : "🔒 वेबसाइट प्राइवेट रखें: बंद";
         document.getElementById('toggleReverseTableBtn').innerText = isTableReversed ? "🔄 सुल्टी बारी लागू करें" : "🔄 उल्टी बारी लागू करें";
         document.getElementById('toggleBottomNoticeBtn').innerText = isBottomNoticePublic ? "🔓 बॉटम संदेश बॉक्स (Public): चालू" : "🔒 बॉटम संदेश बॉक्स (Public): बंद";
         
-        document.getElementById('directAdminDateBox').style.display = isAdmin ? 'block' : 'none';
         document.getElementById('tableWrapper').style.display = (isAdmin || isTablePublic) ? 'block' : 'none';
         document.getElementById('bottomNoticeCardWrapper').style.display = (isAdmin || isBottomNoticePublic) ? 'block' : 'none';
     }
@@ -1266,11 +1246,13 @@
 
         let user = initialData[selIdx];
         let duesHtml = (user.amount && user.amount > 0) ? `<div class="due-msg">धनराशि: ₹${user.amount} (जमा तारीख: ${user.date || 'नियत नहीं'})</div>` : '';
+        let hoursToDistribute = parseFloat(document.getElementById('hoursToDistribute').value) || 24;
+        let startStr = document.getElementById('startTime').value.trim();
 
         resBox.style.display = 'block';
 
         if (selectedMode === "straight") {
-            let slot = getStraightSlot(user);
+            let slot = getTurnSlotCustom(user, isTableReversed, hoursToDistribute, startStr, !isTableReversed);
             let hPart = Math.floor(slot.minutes / 60);
             let mPart = Math.round(slot.minutes % 60);
             let allDates = waterDates.join(', ') || 'निर्दिष्ट नहीं';
@@ -1279,96 +1261,164 @@
             resBox.innerHTML = `
                 <b>👤 नाम:</b> ${user.name}<br>
                 <b>🚰 वितरण प्रकार:</b> लगातार (Straight) [${turnOrderText}]<br>
-                <b>📅 तारीखें:</b> ${allDates}<br>
+                <b>📅 माह की तारीखें:</b> ${allDates}<br>
                 <b>⏰ सिंचाई समय:</b> <span style="color:#1a5276; font-weight:bold;">${slot.start} से ${slot.end}</span> (${hPart} घंटे ${mPart} मिनट)
                 ${duesHtml}
             `;
+        } else if (selectedMode === "samedayoddeven") {
+            let halfH = hoursToDistribute / 2; 
+
+            let oddDatesList = waterDates.filter((_, idx) => idx % 2 === 0).join(', ') || 'निर्दिष्ट नहीं';
+            let evenDatesList = waterDates.filter((_, idx) => idx % 2 !== 0).join(', ') || 'निर्दिष्ट नहीं';
+
+            let primaryIsRev = isTableReversed;
+            let secondaryIsRev = !isTableReversed;
+
+            // ग्रुप A की 1st बारी का कुल समय
+            let group1Mins = getShiftTotalMinutes(primaryIsRev, halfH, !primaryIsRev);
+            let midTimeStrGroupA = addMinutesToTime(startStr, group1Mins);
+
+            let slot1_Shift1 = getTurnSlotCustom(user, primaryIsRev, halfH, startStr, !primaryIsRev);
+            let slot1_Shift2 = getTurnSlotCustom(user, secondaryIsRev, halfH, midTimeStrGroupA, primaryIsRev);
+
+            // ग्रुप B की 1st बारी का कुल समय
+            let group2Mins = getShiftTotalMinutes(secondaryIsRev, halfH, primaryIsRev);
+            let midTimeStrGroupB = addMinutesToTime(startStr, group2Mins);
+
+            let slot2_Shift1 = getTurnSlotCustom(user, secondaryIsRev, halfH, startStr, primaryIsRev);
+            let slot2_Shift2 = getTurnSlotCustom(user, primaryIsRev, halfH, midTimeStrGroupB, !primaryIsRev);
+
+            let h1_1 = Math.floor(slot1_Shift1.minutes / 60), m1_1 = Math.round(slot1_Shift1.minutes % 60);
+            let h1_2 = Math.floor(slot1_Shift2.minutes / 60), m1_2 = Math.round(slot1_Shift2.minutes % 60);
+            let h2_1 = Math.floor(slot2_Shift1.minutes / 60), m2_1 = Math.round(slot2_Shift1.minutes % 60);
+            let h2_2 = Math.floor(slot2_Shift2.minutes / 60), m2_2 = Math.round(slot2_Shift2.minutes % 60);
+
+            resBox.innerHTML = `
+                <b>👤 नाम:</b> ${user.name} (Same-Day रोटेशन)<br>
+                <hr style="border:0; border-top:1px dashed #27ae60; margin:6px 0;">
+                <b>📅 ग्रुप-A तारीखें [${oddDatesList}]:</b><br>
+                • <b>1st बारी:</b> <span style="color:#1a5276; font-weight:bold;">${slot1_Shift1.start} से ${slot1_Shift1.end}</span> (${h1_1}घं ${m1_1}मि)<br>
+                • <b>2nd बारी:</b> <span style="color:#c0392b; font-weight:bold;">${slot1_Shift2.start} से ${slot1_Shift2.end}</span> (${h1_2}घं ${m1_2}मि)<br>
+                <hr style="border:0; border-top:1px dashed #27ae60; margin:6px 0;">
+                <b>📅 ग्रुप-B तारीखें [${evenDatesList}]:</b><br>
+                • <b>1st बारी:</b> <span style="color:#c0392b; font-weight:bold;">${slot2_Shift1.start} से ${slot2_Shift1.end}</span> (${h2_1}घं ${m2_1}मि)<br>
+                • <b>2nd बारी:</b> <span style="color:#1a5276; font-weight:bold;">${slot2_Shift2.start} से ${slot2_Shift2.end}</span> (${h2_2}घं ${m2_2}मि)
+                ${duesHtml}
+            `;
         } else {
-            let slotOdd = getTurn1Slot(user);  
-            let slotEven = getTurn2Slot(user); 
+            let slotOdd = getTurnSlotCustom(user, isTableReversed, hoursToDistribute, startStr, !isTableReversed);  
+            let slotEven = getTurnSlotCustom(user, !isTableReversed, hoursToDistribute, startStr, isTableReversed); 
 
-            let hPartOdd = Math.floor(slotOdd.minutes / 60);
-            let mPartOdd = Math.round(slotOdd.minutes % 60);
+            let hPartOdd = Math.floor(slotOdd.minutes / 60), mPartOdd = Math.round(slotOdd.minutes % 60);
+            let hPartEven = Math.floor(slotEven.minutes / 60), mPartEven = Math.round(slotEven.minutes % 60);
 
-            let hPartEven = Math.floor(slotEven.minutes / 60);
-            let mPartEven = Math.round(slotEven.minutes % 60);
+            let oddDatesList = waterDates.filter((_, idx) => idx % 2 === 0).join(', ') || 'निर्दिष्ट नहीं';
+            let evenDatesList = waterDates.filter((_, idx) => idx % 2 !== 0).join(', ') || 'निर्दिष्ट नहीं';
 
-            let date1 = waterDates.length > 0 ? waterDates[0] : 'निर्दिष्ट नहीं';
-            let date2 = waterDates.length > 1 ? waterDates[1] : 'निर्दिष्ट नहीं';
-
-            let oddDate = isTableReversed ? date2 : date1;
-            let evenDate = isTableReversed ? date1 : date2;
-
-            if (!isTableReversed) {
-                resBox.innerHTML = `
-                    <b>👤 नाम:</b> ${user.name}<br>
-                    <b>⏰ 1. सुल्टी बारी (Odd) [दिनांक: ${oddDate}]:</b> <span style="color:#1a5276; font-weight:bold;">${slotOdd.start} से ${slotOdd.end}</span> (${hPartOdd} घंटे ${mPartOdd} मिनट)<br>
-                    <b>🔄 2. उल्टी बारी (Even) [दिनांक: ${evenDate}]:</b> <span style="color:#c0392b; font-weight:bold;">${slotEven.start} से ${slotEven.end}</span> (${hPartEven} घंटे ${mPartEven} मिनट)
-                    ${duesHtml}
-                `;
-            } else {
-                resBox.innerHTML = `
-                    <b>👤 नाम:</b> ${user.name}<br>
-                    <b>🔄 1. उल्टी बारी (Even) [दिनांक: ${evenDate}]:</b> <span style="color:#c0392b; font-weight:bold;">${slotEven.start} से ${slotEven.end}</span> (${hPartEven} घंटे ${mPartEven} मिनट)<br>
-                    <b>⏰ 2. सुल्टी बारी (Odd) [दिनांक: ${oddDate}]:</b> <span style="color:#1a5276; font-weight:bold;">${slotOdd.start} से ${slotOdd.end}</span> (${hPartOdd} घंटे ${mPartOdd} मिनट)
-                    ${duesHtml}
-                `;
-            }
+            resBox.innerHTML = `
+                <b>👤 नाम:</b> ${user.name}<br>
+                <b>⏰ 1. 1st बारी [${oddDatesList}]:</b> <span style="color:#1a5276; font-weight:bold;">${slotOdd.start} से ${slotOdd.end}</span> (${hPartOdd} घंटे ${mPartOdd} मिनट)<br>
+                <b>🔄 2. 2nd बारी [${evenDatesList}]:</b> <span style="color:#c0392b; font-weight:bold;">${slotEven.start} से ${slotEven.end}</span> (${hPartEven} घंटे ${mPartEven} मिनट)
+                ${duesHtml}
+            `;
         }
         printBtn.style.display = 'block';
     }
 
     function getFormattedSlipHTML(userIndex) {
         let user = initialData[userIndex];
-        let duesSlipHtml = (user.amount && user.amount > 0) ? `<div class="slip-field" style="color:#c0392b; font-weight:bold;">बकाया: ₹${user.amount} (भुगतान बाकी है सालाना)</div>` : '';
+        let duesSlipHtml = (user.amount && user.amount > 0) ? `<div class="slip-field" style="color:#c0392b; font-weight:bold;">बकाया: ₹${user.amount} (भुगतान बाकी है)</div>` : '';
+        let hoursToDistribute = parseFloat(document.getElementById('hoursToDistribute').value) || 24;
+        let startStr = document.getElementById('startTime').value.trim();
+
+        let allMonthDatesStr = waterDates.length > 0 ? waterDates.join(', ') : 'निर्दिष्ट नहीं';
+        let oddDatesList = waterDates.filter((_, idx) => idx % 2 === 0).join(', ') || 'निर्दिष्ट नहीं';
+        let evenDatesList = waterDates.filter((_, idx) => idx % 2 !== 0).join(', ') || 'निर्दिष्ट नहीं';
 
         if (selectedMode === "straight") {
-            let slot = getStraightSlot(user);
+            let slot = getTurnSlotCustom(user, isTableReversed, hoursToDistribute, startStr, !isTableReversed);
             let hPart = Math.floor(slot.minutes / 60);
             let mPart = Math.round(slot.minutes % 60);
-            let allDates = waterDates.join(', ') || 'निर्दिष्ट नहीं';
 
             return `
             <div class="slip-box">
-                <div class="slip-header-title">💧 सिंचाई पर्ची (लगातार / Straight) 💧</div>
+                <div class="slip-header-title">💧 पूरे महीने की सिंचाई पर्ची (लगातार) 💧</div>
                 <div class="slip-section-title">नाम: ${user.name}</div>
-                <div class="slip-field"><b>तारीखें:</b> ${allDates}</div>
+                <div class="slip-field"><b>माह की तारीखें:</b> <span class="slip-dates-list">${allMonthDatesStr}</span></div>
                 <div class="slip-field"><b>समय:</b> <span class="slip-time-txt">${slot.start} से ${slot.end}</span></div>
                 <div class="slip-field"><b>अवधि:</b> ${hPart} घंटे ${mPart} मिनट</div>
                 ${duesSlipHtml}
                 <div class="slip-divider"></div>
                 <div class="slip-footer-txt">सिंचाई प्रबंधन समिति</div>
             </div>`;
-        } else {
-            let slotOdd = getTurn1Slot(user); 
-            let slotEven = getTurn2Slot(user); 
+        } else if (selectedMode === "samedayoddeven") {
+            let halfH = hoursToDistribute / 2;
 
-            let hPart1 = Math.floor(slotOdd.minutes / 60);
-            let mPart1 = Math.round(slotOdd.minutes % 60);
+            let primaryIsRev = isTableReversed;
+            let secondaryIsRev = !isTableReversed;
 
-            let hPart2 = Math.floor(slotEven.minutes / 60);
-            let mPart2 = Math.round(slotEven.minutes % 60);
+            // समूह A की 1st बारी का कुल समय निकाल कर 2nd बारी को उससे जोड़ा गया है (0 टाइम लॉस)
+            let group1Mins = getShiftTotalMinutes(primaryIsRev, halfH, !primaryIsRev);
+            let midTimeStrGroupA = addMinutesToTime(startStr, group1Mins);
 
-            let oddDates = isTableReversed ? waterDates.filter((_, idx) => idx % 2 !== 0).join(', ') : waterDates.filter((_, idx) => idx % 2 === 0).join(', ');
-            let evenDates = isTableReversed ? waterDates.filter((_, idx) => idx % 2 === 0).join(', ') : waterDates.filter((_, idx) => idx % 2 !== 0).join(', ');
+            let slot1_Shift1 = getTurnSlotCustom(user, primaryIsRev, halfH, startStr, !primaryIsRev);
+            let slot1_Shift2 = getTurnSlotCustom(user, secondaryIsRev, halfH, midTimeStrGroupA, primaryIsRev);
+
+            // समूह B की 1st बारी का कुल समय
+            let group2Mins = getShiftTotalMinutes(secondaryIsRev, halfH, primaryIsRev);
+            let midTimeStrGroupB = addMinutesToTime(startStr, group2Mins);
+
+            let slot2_Shift1 = getTurnSlotCustom(user, secondaryIsRev, halfH, startStr, primaryIsRev);
+            let slot2_Shift2 = getTurnSlotCustom(user, primaryIsRev, halfH, midTimeStrGroupB, !primaryIsRev);
+
+            let h1_1 = Math.floor(slot1_Shift1.minutes / 60), m1_1 = Math.round(slot1_Shift1.minutes % 60);
+            let h1_2 = Math.floor(slot1_Shift2.minutes / 60), m1_2 = Math.round(slot1_Shift2.minutes % 60);
+            let h2_1 = Math.floor(slot2_Shift1.minutes / 60), m2_1 = Math.round(slot2_Shift1.minutes % 60);
+            let h2_2 = Math.floor(slot2_Shift2.minutes / 60), m2_2 = Math.round(slot2_Shift2.minutes % 60);
 
             return `
             <div class="slip-box">
-                <div class="slip-header-title">💧 सिंचाई पर्ची (औड-इवन) 💧</div>
+                <div class="slip-header-title">💧 पूरे महीने की पर्ची (Same-Day) 💧</div>
+                <div class="slip-section-title">नाम: ${user.name}</div>
                 
-                <div class="slip-section-title">सुल्टी बारी (Odd) - नाम: ${user.name}</div>
-                <div class="slip-field"><b>बारी तारीख:</b> ${oddDates || 'निर्दिष्ट नहीं'}</div>
-                <div class="slip-field"><b>समय:</b> <span class="slip-time-txt">${slotOdd.start} से ${slotOdd.end}</span></div>
-                <div class="slip-field"><b>अवधि:</b> ${hPart1} घंटे ${mPart1} मिनट</div>
+                <div class="slip-field"><b>📅 ग्रुप-A तारीखें:</b></div>
+                <div class="slip-dates-list">${oddDatesList}</div>
+                <div class="slip-field">• <b>1st बारी:</b> <span class="slip-time-txt">${slot1_Shift1.start} से ${slot1_Shift1.end}</span> (${h1_1}घं ${m1_1}मि)</div>
+                <div class="slip-field">• <b>2nd बारी:</b> <span class="slip-even-time">${slot1_Shift2.start} से ${slot1_Shift2.end}</span> (${h1_2}घं ${m1_2}मि)</div>
 
                 <div class="slip-divider"></div>
 
-                <div class="slip-section-title">उल्टी बारी (Even) - नाम: ${user.name}</div>
-                <div class="slip-field"><b>बारी तारीख:</b> ${evenDates || 'निर्दिष्ट नहीं'}</div>
-                <div class="slip-field"><b>समय:</b> <span class="slip-even-time">${slotEven.start} से ${slotEven.end}</span></div>
-                <div class="slip-field"><b>अवधि:</b> ${hPart2} घंटे ${mPart2} मिनट</div>
+                <div class="slip-field"><b>📅 ग्रुप-B तारीखें (रोटेशन):</b></div>
+                <div class="slip-dates-list" style="color:#c0392b;">${evenDatesList}</div>
+                <div class="slip-field">• <b>1st बारी:</b> <span class="slip-even-time">${slot2_Shift1.start} से ${slot2_Shift1.end}</span> (${h2_1}घं ${m2_1}मि)</div>
+                <div class="slip-field">• <b>2nd बारी:</b> <span class="slip-time-txt">${slot2_Shift2.start} से ${slot2_Shift2.end}</span> (${h2_2}घं ${m2_2}मि)</div>
+
+                ${duesSlipHtml}
+                <div class="slip-divider"></div>
+                <div class="slip-footer-txt">सिंचाई प्रबंधन समिति</div>
+            </div>`;
+        } else {
+            let slotOdd = getTurnSlotCustom(user, isTableReversed, hoursToDistribute, startStr, !isTableReversed); 
+            let slotEven = getTurnSlotCustom(user, !isTableReversed, hoursToDistribute, startStr, isTableReversed); 
+
+            let hPart1 = Math.floor(slotOdd.minutes / 60), mPart1 = Math.round(slotOdd.minutes % 60);
+            let hPart2 = Math.floor(slotEven.minutes / 60), mPart2 = Math.round(slotEven.minutes % 60);
+
+            return `
+            <div class="slip-box">
+                <div class="slip-header-title">💧 पूरे महीने की पर्ची (औड-इवन) 💧</div>
+                <div class="slip-section-title">नाम: ${user.name}</div>
+                
+                <div class="slip-field"><b>ग्रुप-A तारीखें:</b> <span class="slip-dates-list">${oddDatesList}</span></div>
+                <div class="slip-field">• <b>1st बारी:</b> <span class="slip-time-txt">${slotOdd.start} से ${slotOdd.end}</span> (${hPart1}घं ${mPart1}मि)</div>
+
+                <div class="slip-divider"></div>
+
+                <div class="slip-field"><b>ग्रुप-B तारीखें:</b> <span class="slip-dates-list" style="color:#c0392b;">${evenDatesList}</span></div>
+                <div class="slip-field">• <b>2nd बारी:</b> <span class="slip-even-time">${slotEven.start} से ${slotEven.end}</span> (${hPart2}घं ${mPart2}मि)</div>
                 ${duesSlipHtml}
 
+                <div class="slip-divider"></div>
                 <div class="slip-footer-txt">सिंचाई प्रबंधन समिति</div>
             </div>`;
         }
@@ -1391,6 +1441,7 @@
     }
 
     function printAllSlips() {
+        generate30DaysCalendar(); 
         let area = document.getElementById('printableArea');
         area.className = "";
         let htmlContent = '';
